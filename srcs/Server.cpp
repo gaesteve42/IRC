@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/01 16:45:52 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/01 17:08:10 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,8 @@ Server::Server(int port) : _port(port)
 {
     // Création du socket du serveur
     _serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (_serverSocket < 0) {
+    if (_serverSocket < 0) 
+    {
         std::cerr << "❌Erreur❌ : Impossible de créer le socket" << std::endl;
         exit(EXIT_FAILURE);
     }
@@ -59,9 +60,11 @@ Server::Server(int port) : _port(port)
 
 
 // Destructeur : ferme le socket principal et tous les clients
-Server::~Server() {
+Server::~Server() 
+{
     close(_serverSocket);
-    for (size_t i = 0; i < _pollFds.size(); i++) {
+    for (size_t i = 0; i < _pollFds.size(); i++) 
+    {
         close(_pollFds[i].fd);
     }
 }
