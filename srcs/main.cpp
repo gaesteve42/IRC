@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:28:56 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/03/31 17:35:47 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/01 17:01:30 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 // main.cpp
-#include <iostream>
-#include "../Includes/Client.hpp"
-#include "../Includes/Channel.hpp"
+//#include <iostream>
+//#include "../Includes/Client.hpp"
+//#include "../Includes/Channel.hpp"
 
 
 //            MAIN TEST DES CLASSES CHANNEL ET CLIENT, CHECK DE L IMPLEMENTATION ( tu peux suppr si tu veux, c'est osef je voulais juste voir si tout fonctionnait)
@@ -62,3 +62,43 @@
 // 	}
 // 	return 0;
 // }
+
+
+
+
+
+
+
+
+
+
+
+
+/*----------------------------------------TEST MAIN SERVER (YOAN)----------------------------------------------------------
+
+#include "../Includes/Server.hpp"
+
+int main(int argc, char** argv) 
+{
+    if (argc != 2) 
+    {
+        std::cerr << "Usage: " << argv[0] << " <port>" << std::endl;
+        return 1;
+    }
+
+    int port = std::atoi(argv[1]);
+    if (port <= 0 || port > 65535) 
+    {
+        std::cerr << "Erreur : Port invalide" << std::endl;
+        return 1;
+    }
+
+    Server server(port);
+    server.run();  // Démarre le serveur
+}
+
+dans le terminal : 
+yoan@OKAMA-GAMESPHERE:~/IRC/srcs$ g++ -Wall -Wextra -Werror -std=c++98 Server.cpp main.cpp -o ircserv
+yoan@OKAMA-GAMESPHERE:~/IRC/srcs$ ./ircserv 6667
+
+-----------------------------------------------------------------------------------------------------------------------*/
