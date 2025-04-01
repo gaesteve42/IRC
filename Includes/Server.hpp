@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:05:58 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/01 16:49:13 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/01 17:07:19 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,10 @@
 #include <cstring>  // Pour memset
 #include <cstdlib>
 
-class Server {
+
+
+class Server 
+{
 private:
     int _serverSocket;                  // Socket principal du serveur
     int _port;                           // Port sur lequel on écoute
