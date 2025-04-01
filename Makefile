@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+         #
+#    By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/03/30 15:28:46 by gaesteve          #+#    #+#              #
-#    Updated: 2025/03/30 15:32:29 by gaesteve         ###   ########.fr        #
+#    Updated: 2025/04/01 17:14:35 by yonieva          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,7 +21,7 @@ SRCS		= main.cpp \
 			  Server.cpp \
 			  Client.cpp \
 			  Channel.cpp \
-			  Utils.cpp
+			  Parsing.cpp
 
 SRCS_PATH	= $(addprefix $(SRCS_DIR), $(SRCS))
 OBJS		= $(addprefix $(OBJS_DIR), $(SRCS:.cpp=.o))
