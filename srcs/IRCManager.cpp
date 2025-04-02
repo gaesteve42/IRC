@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/02 14:17:16 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/02 22:10:42 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,3 +98,26 @@ void IRCManager::privmsgCommand(int fd, const std::string &channelName, const st
 	}
 }
 
+void IRCManager::nickCommand(int fd, const std::string &nickname)
+{
+	User *user = getUser(fd);
+	if (user)
+	{
+		user->setNickname(nickname);
+		std::cout << "✅ Nickname défini à " << nickname << " pour FD " << fd << std::endl;
+		if (!user->getUsername().empty())
+			user->setAuthenticated(true);
+	}
+}
+
+void IRCManager::userCommand(int fd, const std::string &username)
+{
+	User *user = getUser(fd);
+	if (user)
+	{
+		user->setUsername(username);
+		std::cout << "✅ Username défini à " << username << " pour FD " << fd << std::endl;
+		if (!user->getNickname().empty())
+		user->setAuthenticated(true);
+	}
+}

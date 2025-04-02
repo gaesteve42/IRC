@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:04:06 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/02 14:18:06 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/02 22:05:37 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ public:
 	void joinCommand(int fd, const std::string &channelName);
 	void partCommand(int fd, const std::string &channelName);
 	void privmsgCommand(int fd, const std::string &channelName, const std::string &message);
+	void nickCommand(int fd, const std::string &nickname);
+	void userCommand(int fd, const std::string &username);
 };
 
 #endif
