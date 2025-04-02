@@ -3,20 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:28:56 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/01 17:01:30 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/02 12:01:10 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// main.cpp
-//#include <iostream>
-//#include "../Includes/Client.hpp"
-//#include "../Includes/Channel.hpp"
+// #include <iostream>
+// #include "../Includes/User.hpp"
+// #include "../Includes/Channel.hpp"
 
-
-//            MAIN TEST DES CLASSES CHANNEL ET CLIENT, CHECK DE L IMPLEMENTATION ( tu peux suppr si tu veux, c'est osef je voulais juste voir si tout fonctionnait)
+//           MAIN TEST ( Gauthier )
 // int main()
 // {
 // 	// Création des clients
@@ -64,30 +62,20 @@
 // }
 
 
-
-
-
-
-
-
-
-
-
-
 /*----------------------------------------TEST MAIN SERVER (YOAN)----------------------------------------------------------
 
 #include "../Includes/Server.hpp"
 
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
-    if (argc != 2) 
+    if (argc != 2)
     {
         std::cerr << "Usage: " << argv[0] << " <port>" << std::endl;
         return 1;
     }
 
     int port = std::atoi(argv[1]);
-    if (port <= 0 || port > 65535) 
+    if (port <= 0 || port > 65535)
     {
         std::cerr << "Erreur : Port invalide" << std::endl;
         return 1;
@@ -97,7 +85,7 @@ int main(int argc, char** argv)
     server.run();  // Démarre le serveur
 }
 
-dans le terminal : 
+dans le terminal :
 yoan@OKAMA-GAMESPHERE:~/IRC/srcs$ g++ -Wall -Wextra -Werror -std=c++98 Server.cpp main.cpp -o ircserv
 yoan@OKAMA-GAMESPHERE:~/IRC/srcs$ ./ircserv 6667
 

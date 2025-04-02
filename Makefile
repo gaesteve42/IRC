@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+         #
+#    By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/03/30 15:28:46 by gaesteve          #+#    #+#              #
-#    Updated: 2025/04/01 17:14:35 by yonieva          ###   ########.fr        #
+#    Updated: 2025/04/02 11:51:32 by gaesteve         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,7 @@ OBJS_DIR	= objs/
 
 SRCS		= main.cpp \
 			  Server.cpp \
-			  Client.cpp \
+			  User.cpp \
 			  Channel.cpp \
 			  Parsing.cpp
 

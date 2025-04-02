@@ -6,18 +6,18 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:15 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/03/31 17:31:52 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/02 11:59:30 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 
-#include "Client.hpp"
+#include "User.hpp"
 #include <vector>
 #include <algorithm>
 
-// Classe représentant un canal IRC (équivalent à un salon textuel sur Discord)
+// Classe représentant un canal IRC (c'est un salon textuel sur Discord EN GROS)
 class Channel
 {
 private:
