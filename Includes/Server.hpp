@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:05:58 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/01 17:07:19 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/02 16:46:47 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,9 @@
 #include <cstring>  // Pour memset
 #include <cstdlib>
 
+#include "Parsing.hpp"
+#include "IRCManager.hpp"
+
 
 
 class Server 
@@ -35,6 +38,8 @@ private:
     void handleNewConnection();          // Gère les nouvelles connexions
     void handleClientMessage(int clientFd); // Gère les messages reçus des clients
     void removeClient(int clientFd);     // Supprime un client qui s'est déconnecté
+    Parsing parser;
+    IRCManager ircManager;
 
 public:
     Server(int port);

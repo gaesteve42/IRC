@@ -6,11 +6,13 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/01 17:08:10 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/02 16:47:41 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Server.hpp"
+#include "../Includes/Parsing.hpp"
+
 
 // Constructeur du serveur
 Server::Server(int port) : _port(port) 
@@ -93,10 +95,14 @@ void Server::handleNewConnection()
     clientPollFd.events = POLLIN;
     _pollFds.push_back(clientPollFd);
 
+    // Création du User dans IRCManager
+    ircManager.newUser(clientSocket);
+
     std::cout << "🆕 Nouvelle connexion acceptée (FD : " << clientSocket << ")" << std::endl;
 }
 
-// Gère les messages envoyés par un client
+
+// Gère les messages envoyés par un client avec parsing puis envoi a  irc_manager
 void Server::handleClientMessage(int clientFd) 
 {
     char buffer[512];
@@ -107,14 +113,44 @@ void Server::handleClientMessage(int clientFd)
     {
         std::cout << "❌ Client déconnecté (FD : " << clientFd << ")" << std::endl;
         removeClient(clientFd);
+        ircManager.removeUser(clientFd);
         return;
     }
 
-    std::cout << "📩 Message reçu de FD " << clientFd << " : " << buffer << std::endl;
-    
-    // Pour l'instant, on renvoie le message au client (Echo server)
-    send(clientFd, buffer, bytesReceived, 0);
+    std::string message(buffer);
+    std::vector<std::string> command = parser.parseCommand(message);
+
+    if (!command.empty()) 
+    {
+        std::cout << "🔍 Commande reçue : " << command[0] << std::endl;
+        User *user = ircManager.getUser(clientFd);
+        
+        if (!user) 
+            return;
+
+        if (command[0] == "NICK" && command.size() > 1) 
+            //ircManager.nickCommand(clientFd, command[1]);
+        else if (command[0] == "USER" && command.size() > 1) 
+            //ircManager.userCommand(clientFd, command[1]);
+
+        // ✅ Vérification avant toute action
+        else if (!user->getIsAuthenticated()) 
+        {
+            std::string errorMsg = "❌ Vous devez vous authentifier avec NICK et USER !\n";
+            send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
+        }
+        else if (command[0] == "JOIN" && command.size() > 1) 
+            ircManager.joinCommand(clientFd, command[1]);
+        else if (command[0] == "PART" && command.size() > 1) 
+            ircManager.partCommand(clientFd, command[1]);
+        else if (command[0] == "PRIVMSG" && command.size() > 2) 
+            ircManager.privmsgCommand(clientFd, command[1], command[2]);
+    }
 }
+
+
+
+
 
 // Supprime un client qui s'est déconnecté
 void Server::removeClient(int clientFd) 
