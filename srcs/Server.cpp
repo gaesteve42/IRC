@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/02 16:52:07 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/02 16:55:59 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,8 +167,8 @@ void Server::removeClient(int clientFd)
         }
     }
 
-    // Supprimer le client de IRCManager
-    //ircManager.removeUser(clientFd);
+    //Supprimer le client de IRCManager
+    ircManager.removeUser(clientFd);
 }
 
 
