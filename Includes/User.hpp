@@ -1,33 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Client.hpp                                         :+:      :+:    :+:   */
+/*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:00 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/03/31 17:31:56 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/02 14:18:17 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CLIENT_HPP
-#define CLIENT_HPP
+#ifndef USER_HPP
+#define USER_HPP
 
 #include <string>
 
-// Classe représentant un utilisateur connecté au serveur IRC
-class Client
+class User
 {
 private:
-	std::string nickname;   // Pseudonyme du client affiché dans les salons IRC
-	std::string username;   // Nom réel du client (login système ou identifiant unique)
-	std::string hostname;   // Adresse IP ou nom d'hôte du client
+	std::string nickname;   // Pseudonyme de l'utilisateur affiché dans les salons IRC
+	std::string username;   // Nom réel de l'utilisateur (login système ou identifiant unique)
+	std::string hostname;   // Adresse IP ou nom d'hôte de l'utilisateur
 	bool isOperator;        // Indique si l'utilisateur a des droits spéciaux (opérateur)
 
 public:
 	// Constructeurs
-	Client(); // Constructeur par défaut
-	Client(const std::string &nick, const std::string &user, const std::string &host); // Constructeur paramétré
+	User(); // Constructeur par défaut
+	User(const std::string &nick, const std::string &user, const std::string &host); // Constructeur paramétré
 
 	// Getters (pour accéder aux attributs privés)
 	std::string getNickname() const;

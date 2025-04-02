@@ -6,61 +6,50 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:28:56 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/02 12:01:10 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/02 14:17:43 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// #include <iostream>
 // #include "../Includes/User.hpp"
 // #include "../Includes/Channel.hpp"
+// #include "../Includes/IRCManager.hpp"
 
-//           MAIN TEST ( Gauthier )
+/*----------------------------------------TEST MAIN (Gauthier)----------------------------------------------------------
 // int main()
 // {
-// 	// Création des clients
-// 	Client client1("Guluguts", "Gauthier", "192.168.1.2");
-// 	Client client2("Fatabot", "Yoan", "192.168.1.3");
-// 	// Affichage des informations client
-// 	std::cout << "Client 1: " << client1.getNickname() << " (" << client1.getUsername() << ") - IP: " << client1.getHostname() << std::endl;
-// 	std::cout << "Client 2: " << client2.getNickname() << " (" << client2.getUsername() << ") - IP: " << client2.getHostname() << std::endl;
-// 	// Création d'un canal
-// 	Channel channel("#LobbyRanked");
-// 	// Configuration du canal
-// 	channel.setTopic("Bienvenue dans la partie ranked !");
-// 	channel.setInviteOnly(true);
-// 	channel.setKey("secret123");
-// 	channel.setUserLimit(5);
-// 	// Ajout des clients au canal
-// 	if (channel.addMember(&client1))
-// 		std::cout << client1.getNickname() << " a rejoint " << channel.getChannelName() << std::endl;
-// 	else
-// 		std::cout << client1.getNickname() << " n'a pas pu rejoindre " << channel.getChannelName() << std::endl;
+// 	IRCManager ircManager;
 
-// 	if (channel.addMember(&client2))
-// 		std::cout << client2.getNickname() << " a rejoint " << channel.getChannelName() << std::endl;
-// 	else
-// 		std::cout << client2.getNickname() << " n'a pas pu rejoindre " << channel.getChannelName() << std::endl;
-// 	// Affichage des infos du canal
-// 	std::cout << "Canal: " << channel.getChannelName() << " | Sujet: " << channel.getTopic() << " | Membres: " << channel.getMembers().size() << std::endl;
-// 	// Affichage des membres du canal
-// 	for (size_t i = 0; i < channel.getMembers().size(); ++i)
-// 	{
-// 		Client *member = channel.getMembers()[i];
-// 		std::cout << "- " << member->getNickname() << std::endl;
-// 	}
-// 	// Retirer un membre
-// 	channel.removeMember(&client1);
-// 	std::cout << client1.getNickname() << " a quitté " << channel.getChannelName() << std::endl;
-// 	// Vérification finale des membres
-// 	std::cout << "Membres restants dans " << channel.getChannelName() << " : " << channel.getMembers().size() << std::endl;
-// 	for (size_t i = 0; i < channel.getMembers().size(); ++i)
-// 	{
-// 		Client *member = channel.getMembers()[i];
-// 		std::cout << "- " << member->getNickname() << std::endl;
-// 	}
+// 	// Simulation de deux utilisateurs se connectant au serveur
+// 	int fdUser1 = 1; // faux descripteur de fichier (fd simulé)
+// 	int fdUser2 = 2;
+
+// 	ircManager.newUser(fdUser1);
+// 	ircManager.newUser(fdUser2);
+
+// 	// Attribution des nicknames aux utilisateurs pour les tests
+// 	ircManager.getUser(fdUser1)->setNickname("Alice");
+// 	ircManager.getUser(fdUser2)->setNickname("Bob");
+
+// 	// Test de la commande JOIN pour rejoindre un canal
+// 	ircManager.handleMessage(fdUser1, "JOIN #channel1");
+// 	ircManager.handleMessage(fdUser2, "JOIN #channel1");
+
+// 	// Test de la commande PRIVMSG pour envoyer un message dans le canal
+// 	ircManager.handleMessage(fdUser1, "PRIVMSG #channel1 Bonjour tout le monde !");
+
+// 	// Test de la commande PART pour quitter un canal
+// 	ircManager.handleMessage(fdUser2, "PART #channel1");
+
+// 	// Vérification après la sortie d'un utilisateur
+// 	ircManager.handleMessage(fdUser1, "PRIVMSG #channel1 Où est passé Bob ?");
+
+// 	// Déconnexion des utilisateurs
+// 	ircManager.removeUser(fdUser1);
+// 	ircManager.removeUser(fdUser2);
+
 // 	return 0;
 // }
-
+-----------------------------------------------------------------------------------------------------------------------*/
 
 /*----------------------------------------TEST MAIN SERVER (YOAN)----------------------------------------------------------
 

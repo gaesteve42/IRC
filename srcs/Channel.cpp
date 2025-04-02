@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:21 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/02 11:58:40 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/02 14:17:54 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,22 +17,22 @@ Channel::Channel(const std::string &name)
 	  topicRestricted(false), userLimit(0) {}
 
 // Ajoute un membre au canal s'il y a de la place et qu'il n'est pas déjà membre
-bool Channel::addMember(Client *client)
+bool Channel::addMember(User *user)
 {
 	if (userLimit != 0 && members.size() >= userLimit)
 		return false;
-	if (!isMember(client))
+	if (!isMember(user))
 	{
-		members.push_back(client);
+		members.push_back(user);
 		return true;
 	}
 	return false;
 }
 
 // Retire un membre du canal
-void Channel::removeMember(Client *client)
+void Channel::removeMember(User *user)
 {
-	std::vector<Client*>::iterator it = std::find(members.begin(), members.end(), client);
+	std::vector<User*>::iterator it = std::find(members.begin(), members.end(), user);
 	if (it != members.end())
 		members.erase(it);
 }
@@ -44,7 +44,7 @@ std::string Channel::getKey() const { return key; }
 bool Channel::isInviteOnly() const { return inviteOnly; }
 bool Channel::isTopicRestricted() const { return topicRestricted; }
 size_t Channel::getUserLimit() const { return userLimit; }
-const std::vector<Client*> &Channel::getMembers() const { return members; }
+const std::vector<User*> &Channel::getMembers() const { return members; }
 
 // ===== Setters =====
 void Channel::setTopic(const std::string &topic) { this->topic = topic; }
@@ -54,9 +54,9 @@ void Channel::setTopicRestricted(bool restricted) { topicRestricted = restricted
 void Channel::setUserLimit(size_t limit) { userLimit = limit; }
 
 // ===== Utilitaire =====
-// Vérifie si un client spécifique est déjà membre du canal
-bool Channel::isMember(const Client *client) const
+// Vérifie si un user spécifique est déjà membre du canal
+bool Channel::isMember(const User *user) const
 {
-	return std::find(members.begin(), members.end(), client) != members.end();
+	return std::find(members.begin(), members.end(), user) != members.end();
 }
 

@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:15 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/02 11:59:30 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/02 14:17:59 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,15 +27,15 @@ private:
 	bool inviteOnly;               // Accès uniquement sur invitation (mode +i)
 	bool topicRestricted;          // Seuls les opérateurs peuvent changer le sujet (mode +t)
 	size_t userLimit;              // Nombre max de membres autorisés (mode +l, 0 = illimité)
-	std::vector<Client*> members;  // Liste des membres présents dans le canal
+	std::vector<User*> members;  // Liste des membres présents dans le canal
 
 public:
 	// Constructeur
 	Channel(const std::string &name);
 
 	// Gestion des membres
-	bool addMember(Client *client);       // Ajoute un membre si possible
-	void removeMember(Client *client);    // Retire un membre
+	bool addMember(User *user);       // Ajoute un membre si possible
+	void removeMember(User *user);    // Retire un membre
 
 	// Getters
 	std::string getChannelName() const;
@@ -44,7 +44,7 @@ public:
 	bool isInviteOnly() const;
 	bool isTopicRestricted() const;
 	size_t getUserLimit() const;
-	const std::vector<Client*> &getMembers() const;
+	const std::vector<User*> &getMembers() const;
 
 	// Setters
 	void setTopic(const std::string &topic);
@@ -54,7 +54,7 @@ public:
 	void setUserLimit(size_t limit);
 
 	// Fonctions utilitaires
-	bool isMember(const Client *client) const; // Vérifie si un client est déjà membre du canal
+	bool isMember(const User *User) const; // Vérifie si un User est déjà membre du canal
 };
 
 #endif

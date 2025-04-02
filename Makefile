@@ -6,7 +6,7 @@
 #    By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/03/30 15:28:46 by gaesteve          #+#    #+#              #
-#    Updated: 2025/04/02 11:51:32 by gaesteve         ###   ########.fr        #
+#    Updated: 2025/04/02 12:33:01 by gaesteve         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,6 +21,7 @@ SRCS		= main.cpp \
 			  Server.cpp \
 			  User.cpp \
 			  Channel.cpp \
+			  IRCManager.cpp \
 			  Parsing.cpp
 
 SRCS_PATH	= $(addprefix $(SRCS_DIR), $(SRCS))
