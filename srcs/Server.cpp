@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/02 16:55:59 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/02 22:23:22 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,8 @@ Server::Server(int port) : _port(port)
     serverAddr.sin_port = htons(_port);
 
     // Attacher le socket à l'adresse et au port
-    if (bind(_serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
+    if (bind(_serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) 
+    {
         std::cerr << "❌Erreur❌ : Bind échoué" << std::endl;
         exit(EXIT_FAILURE);
     }
@@ -96,13 +97,13 @@ void Server::handleNewConnection()
     _pollFds.push_back(clientPollFd);
 
     // Création du User dans IRCManager
-    ircManager.newUser(clientSocket);
+    IRCManager.newUser(clientSocket);
 
     std::cout << "🆕 Nouvelle connexion acceptée (FD : " << clientSocket << ")" << std::endl;
 }
 
 
-// Gère les messages envoyés par un client avec parsing puis envoi a  irc_manager
+// Gère les messages envoyés par un client avec parsing puis envoi a  IRC_manager
 void Server::handleClientMessage(int clientFd) 
 {
     char buffer[512];
@@ -113,7 +114,7 @@ void Server::handleClientMessage(int clientFd)
     {
         std::cout << "❌ Client déconnecté (FD : " << clientFd << ")" << std::endl;
         removeClient(clientFd);
-        ircManager.removeUser(clientFd);
+        IRCManager.removeUser(clientFd);
         return;
     }
 
@@ -123,15 +124,15 @@ void Server::handleClientMessage(int clientFd)
     if (!command.empty()) 
     {
         std::cout << "🔍 Commande reçue : " << command[0] << std::endl;
-        User *user = ircManager.getUser(clientFd);
+        User *user = IRCManager.getUser(clientFd);
         
         if (!user) 
             return;
 
         if (command[0] == "NICK" && command.size() > 1) 
-            //ircManager.nickCommand(clientFd, command[1]);
+            IRCManager.nickCommand(clientFd, command[1]);
         else if (command[0] == "USER" && command.size() > 1) 
-            //ircManager.userCommand(clientFd, command[1]);
+            IRCManager.userCommand(clientFd, command[1]);
 
         // ✅ Vérification avant toute action
         else if (!user->getIsAuthenticated()) 
@@ -140,11 +141,11 @@ void Server::handleClientMessage(int clientFd)
             send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
         }
         else if (command[0] == "JOIN" && command.size() > 1) 
-            ircManager.joinCommand(clientFd, command[1]);
+            IRCManager.joinCommand(clientFd, command[1]);
         else if (command[0] == "PART" && command.size() > 1) 
-            ircManager.partCommand(clientFd, command[1]);
+            IRCManager.partCommand(clientFd, command[1]);
         else if (command[0] == "PRIVMSG" && command.size() > 2) 
-            ircManager.privmsgCommand(clientFd, command[1], command[2]);
+            IRCManager.privmsgCommand(clientFd, command[1], command[2]);
     }
 }
 
@@ -168,7 +169,7 @@ void Server::removeClient(int clientFd)
     }
 
     //Supprimer le client de IRCManager
-    ircManager.removeUser(clientFd);
+    IRCManager.removeUser(clientFd);
 }
 
 
