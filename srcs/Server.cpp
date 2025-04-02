@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/02 16:47:41 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/02 16:52:07 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,6 +156,8 @@ void Server::handleClientMessage(int clientFd)
 void Server::removeClient(int clientFd) 
 {
     close(clientFd);
+    
+    // ✅ Supprimer le client de _pollFds
     for (size_t i = 0; i < _pollFds.size(); i++) 
     {
         if (_pollFds[i].fd == clientFd) 
@@ -164,7 +166,11 @@ void Server::removeClient(int clientFd)
             break;
         }
     }
+
+    // Supprimer le client de IRCManager
+    //ircManager.removeUser(clientFd);
 }
+
 
 // Boucle principale du serveur
 void Server::run() 
