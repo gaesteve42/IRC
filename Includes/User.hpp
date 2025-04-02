@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:00 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/02 22:05:43 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/02 22:17:33 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ private:
 	std::string username;   // Nom réel de l'utilisateur (login système ou identifiant unique)
 	std::string hostname;   // Adresse IP ou nom d'hôte de l'utilisateur
 	bool isOperator;        // Indique si l'utilisateur a des droits spéciaux (opérateur)
-	bool authenticated;
+	bool authenticated;     // indique si le User est authentifié
 
 public:
 	// Constructeurs

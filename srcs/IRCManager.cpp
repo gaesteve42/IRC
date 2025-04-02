@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/02 22:10:42 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/02 22:22:36 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,14 +46,16 @@ User* IRCManager::getUser(int fd)
 	return NULL;
 }
 
-// Gestion directe des commandes IRC parsées par ton mate
-
 void IRCManager::joinCommand(int fd, const std::string &channelName)
 {
 	User *user = getUser(fd);
 	if (!user)
 		return;
-
+	if (!user->isAuthenticated())
+	{
+		std::cout << "⛔️ FD " << fd << " : Authentification requise avant de pouvoir utiliser les commandes mon gourmand " << std::endl;
+		return ;
+	}
 	if (channels.find(channelName) == channels.end())
 		channels[channelName] = new Channel(channelName);
 
@@ -68,7 +70,11 @@ void IRCManager::partCommand(int fd, const std::string &channelName)
 	User *user = getUser(fd);
 	if (!user)
 		return;
-
+	if (!user->isAuthenticated())
+	{
+		std::cout << "⛔️ FD " << fd << " : Authentification requise avant de pouvoir utiliser les commandes mon gourmand " << std::endl;
+		return ;
+	}
 	if (channels.find(channelName) != channels.end())
 	{
 		channels[channelName]->removeMember(user);
@@ -81,7 +87,11 @@ void IRCManager::privmsgCommand(int fd, const std::string &channelName, const st
 	User *sender = getUser(fd);
 	if (!sender)
 		return;
-
+	if (!sender->isAuthenticated())
+	{
+		std::cout << "⛔️ FD " << fd << " : Authentification requise avant de pouvoir utiliser les commandes mon gourmand " << std::endl;
+		return ;
+	}
 	if (channels.find(channelName) != channels.end())
 	{
 		const std::vector<User*> &members = channels[channelName]->getMembers();
