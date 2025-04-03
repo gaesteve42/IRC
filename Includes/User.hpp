@@ -6,14 +6,14 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:00 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/02 22:17:33 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/03 16:36:24 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef USER_HPP
 #define USER_HPP
 
-#include <string>
+#include "../Includes/Include.hpp"
 
 class User
 {

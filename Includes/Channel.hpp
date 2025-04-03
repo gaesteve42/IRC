@@ -6,18 +6,15 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:15 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/02 14:17:59 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/03 16:40:55 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 
-#include "User.hpp"
-#include <vector>
-#include <algorithm>
+#include "../Includes/Include.hpp"
 
-// Classe représentant un canal IRC (c'est un salon textuel sur Discord EN GROS)
 class Channel
 {
 private:
@@ -28,6 +25,7 @@ private:
 	bool topicRestricted;          // Seuls les opérateurs peuvent changer le sujet (mode +t)
 	size_t userLimit;              // Nombre max de membres autorisés (mode +l, 0 = illimité)
 	std::vector<User*> members;  // Liste des membres présents dans le canal
+	std::set<User*> invitedUsers;
 
 public:
 	// Constructeur
@@ -36,6 +34,12 @@ public:
 	// Gestion des membres
 	bool addMember(User *user);       // Ajoute un membre si possible
 	void removeMember(User *user);    // Retire un membre
+	bool isMember(const User *User) const; // Vérifie si un User est déjà membre du canal
+
+	// Gestion des invitations
+	void addInvite(User* user);         // Ajoute un User à la liste des invités
+	bool isInvited(User* user) const;   // Vérifie si un User est invité
+	void removeInvite(User* user);      // Retire un User de la liste d'invités (optionnel mais utile)
 
 	// Getters
 	std::string getChannelName() const;
@@ -53,8 +57,6 @@ public:
 	void setTopicRestricted(bool restricted);
 	void setUserLimit(size_t limit);
 
-	// Fonctions utilitaires
-	bool isMember(const User *User) const; // Vérifie si un User est déjà membre du canal
 };
 
 #endif

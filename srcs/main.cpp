@@ -6,50 +6,49 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:28:56 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/03 15:17:16 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/03 16:36:37 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-/*----------------------------------------TEST MAIN (GAUTHIER)----------------------------------------------------------
+#include "../Includes/Include.hpp"
 
-// POUR TESTER MODE ET LES COMMANDES COMME NICK,USER, JOIN
-// #include <iostream>
-// #include "../Includes/IRCManager.hpp"
+//----------------------------------------TEST MAIN (GAUTHIER)----------------------------------------------------------
 
-// int main()
-// {
-// 	IRCManager ircManager;
-// 	// Simulation de deux utilisateurs se connectant au serveur
-// 	int fdUser1 = 1;
-// 	int fdUser2 = 2;
-// 	ircManager.newUser(fdUser1);
-// 	ircManager.newUser(fdUser2);
-// 	// Authentification complète (NICK + USER requis)
-// 	ircManager.nickCommand(fdUser1, "Gauthier");
-// 	ircManager.userCommand(fdUser1, "Yoan");
-// 	ircManager.nickCommand(fdUser2, "Kevin");
-// 	ircManager.userCommand(fdUser2, "Nael");
-// 	// Alice crée et rejoint un canal
-// 	ircManager.joinCommand(fdUser1, "#general");
-// 	// Alice devient opératrice du canal (simulé directement)
-// 	ircManager.getUser(fdUser1)->setOperator(true);
-// 	// Alice met le canal en invite-only et limite les utilisateurs à 2
-// 	ircManager.modeCommand(fdUser1, "#general", "+i");
-// 	ircManager.modeCommand(fdUser1, "#general", "+l", "2");
-// 	// Alice invite Bob
-// 	ircManager.modeCommand(fdUser1, "#general", "+o", "Gauthier"); // Bob devient opérateur
-// 	// Bob essaie de rejoindre le canal (invite-only)
-// 	ircManager.joinCommand(fdUser2, "#general"); // Normalement devrait fonctionner (mais invite à gérer)
-// 	// Alice définit un mot de passe pour le canal
-// 	ircManager.modeCommand(fdUser1, "#general", "+k", "123");
-// 	// Afficher état final
-// 	std::cout << "\nÉtat final :" << std::endl;
-// 	std::cout << "Canal #general en invite-only, limite à 2, clé '123'." << std::endl;
-// 	// Déconnexion des utilisateurs
-// 	ircManager.removeUser(fdUser1);
-// 	ircManager.removeUser(fdUser2);
-// 	return 0;
-// }
+int main()
+{
+	IRCManager irc;
+
+	// Simuler deux utilisateurs
+	int fd1 = 1;
+	int fd2 = 2;
+	irc.newUser(fd1);
+	irc.newUser(fd2);
+	irc.nickCommand(fd1, "Alice");
+	irc.userCommand(fd1, "alice42");
+	irc.nickCommand(fd2, "Bob");
+	irc.userCommand(fd2, "bob42");
+	// Alice crée un canal
+	irc.joinCommand(fd1, "#testchan");
+	irc.getUser(fd1)->setOperator(true); // elle devient opérateur
+	// Alice met le canal en invite-only
+	irc.modeCommand(fd1, "#testchan", "+i");
+	// Bob tente de rejoindre (doit échouer)
+	irc.joinCommand(fd2, "#testchan");
+	// Alice invite Bob
+	irc.inviteCommand(fd1, "#testchan", "Bob");
+	// Bob rejoint (doit réussir)
+	irc.joinCommand(fd2, "#testchan");
+	// Alice définit un sujet
+	irc.topicCommand(fd1, "#testchan", "Bienvenue sur le chan privé !");
+	// Bob consulte le sujet
+	irc.topicCommand(fd2, "#testchan", "");
+	// Alice kick Bob
+	irc.kickCommand(fd1, "#testchan", "Bob", "Tu spams trop !");
+	// Suppression des users
+	irc.removeUser(fd1);
+	irc.removeUser(fd2);
+	return 0;
+}
 
 /*----------------------------------------TEST MAIN (YOAN)----------------------------------------------------------
 

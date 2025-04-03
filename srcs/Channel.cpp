@@ -6,11 +6,11 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:21 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/03 14:59:23 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/03 16:59:36 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../Includes/Channel.hpp"
+#include "../Includes/Include.hpp"
 
 Channel::Channel(const std::string &name) : channelName(name), topic(""), key(""), inviteOnly(false), topicRestricted(false), userLimit(0) {}
 
@@ -58,3 +58,7 @@ bool Channel::isMember(const User *user) const
 	return std::find(members.begin(), members.end(), user) != members.end();
 }
 
+// Gestion des invitations
+void Channel::addInvite(User* user) { invitedUsers.insert(user); }
+bool Channel::isInvited(User* user) const { return invitedUsers.find(user) != invitedUsers.end(); }
+void Channel::removeInvite(User* user) { invitedUsers.erase(user); }

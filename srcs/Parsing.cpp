@@ -3,20 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:17:03 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/03 16:47:09 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/03 16:59:00 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../Includes/Parsing.hpp"
+#include "../Includes/Include.hpp"
 
 Parsing::Parsing() {}
 
 Parsing::~Parsing() {}
 
-void Parsing::parseCommand(const std::string &message) 
+void Parsing::parseCommand(const std::string &message)
 {
     // Retirer les caractères de fin de ligne éventuels
     std::string trimmedMessage = message;
@@ -25,7 +25,7 @@ void Parsing::parseCommand(const std::string &message)
     if (trimmedMessage.back() == '\r')
         trimmedMessage.pop_back();  // Retirer '\r'
 
-        
+
     // Initialiser toutes les variables membres à vide
     prefix.clear();
     command.clear();
@@ -36,10 +36,10 @@ void Parsing::parseCommand(const std::string &message)
     std::string temp;
 
     // Partie 1 : Préfixe (si présent)
-    if (message[0] == ':') 
+    if (message[0] == ':')
     {
         size_t spacePos = message.find(' ');
-        if (spacePos != std::string::npos) 
+        if (spacePos != std::string::npos)
         {
             prefix = message.substr(1, spacePos - 1);
             message = message.substr(spacePos + 1);  // Le message sans le préfixe
@@ -48,12 +48,12 @@ void Parsing::parseCommand(const std::string &message)
 
     // Partie 2 : Commande (jusqu'au premier espace)
     size_t spacePos = message.find(' ');
-    if (spacePos != std::string::npos) 
+    if (spacePos != std::string::npos)
     {
         command = message.substr(0, spacePos);
         message = message.substr(spacePos + 1);
-    } 
-    else 
+    }
+    else
     {
         command = message;
         message.clear();
@@ -61,12 +61,12 @@ void Parsing::parseCommand(const std::string &message)
 
     // Partie 3 : Paramètres (tout avant ":")
     size_t colonPos = message.find(':');
-    if (colonPos != std::string::npos) 
+    if (colonPos != std::string::npos)
     {
         params = message.substr(0, colonPos);
         suffix = message.substr(colonPos + 1);  // Le suffixe après ":"
-    } 
-    else 
+    }
+    else
     {
         params = message;
     }
@@ -83,7 +83,7 @@ std::cout << "Suffixe : " << parser.suffix << std::endl;
 */
 
 
-//1 prefix --> :(index[0]) XXXX 
+//1 prefix --> :(index[0]) XXXX
 //2 command --> ex KICK
-//3 parametres --> tout ce qu il y a avant ":" ou "/n ou /r/n" 
+//3 parametres --> tout ce qu il y a avant ":" ou "/n ou /r/n"
 //4 suffix --> tout ce qu il y a apres ":"

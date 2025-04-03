@@ -6,11 +6,11 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:28:53 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/02 22:04:27 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/03 16:36:38 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../Includes/User.hpp"
+#include "../Includes/Include.hpp"
 
 // Constructeur par défaut
 User::User() : nickname(""), username(""), hostname(""), isOperator(false), authenticated(false) {}

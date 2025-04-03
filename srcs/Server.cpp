@@ -3,15 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/03 16:22:32 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/03 16:58:59 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../Includes/Server.hpp"
-#include "../Includes/Parsing.hpp"
+#include "../Includes/Include.hpp"
 
 // Constructeur du serveur
 Server::Server(int port) : _port(port)
@@ -139,12 +138,12 @@ void Server::handleClientMessage(int clientFd)
 			ircManager.partCommand(clientFd, command[1]);
 		else if (command[0] == "PRIVMSG" && command.size() > 2)
 			ircManager.privmsgCommand(clientFd, command[1], command[2]);
-        else if (command[0] == "MODE" && command.size() > 2) 
+        else if (command[0] == "MODE" && command.size() > 2)
         {
             std::string param = (command.size() > 3) ? command[3] : "";
             ircManager.modeCommand(clientFd, command[1], command[2], param);
         }
-            
+
 	}
 }
 

@@ -3,32 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:05:58 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/02 16:46:47 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/03 16:59:32 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include <iostream>
-#include <vector>
-#include <poll.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <cstring>  // Pour memset
-#include <cstdlib>
+#include "../Includes/Include.hpp"
 
-#include "Parsing.hpp"
-#include "IRCManager.hpp"
-
-
-
-class Server 
+class Server
 {
 private:
     int _serverSocket;                  // Socket principal du serveur
