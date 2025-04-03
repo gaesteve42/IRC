@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/03 15:29:54 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/03 16:59:34 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/03 17:02:57 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 #include <netinet/in.h>
 #include <fcntl.h>
 #include <cstring>
+#include <unistd.h>
 
 // === Headers du projet ===
 #include "User.hpp"
