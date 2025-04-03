@@ -3,15 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/03 16:58:59 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/03 17:18:53 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Include.hpp"
 
+//--------------------------------------------------------------------CONSTUCTION DU SERVEUR-----------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------
 // Constructeur du serveur
 Server::Server(int port) : _port(port)
 {
@@ -57,6 +59,8 @@ Server::Server(int port) : _port(port)
 	std::cout << "✅ Serveur lancé sur le port " << _port << std::endl;
 }
 
+//----------------------------------------------------------------------------------------
+
 // Destructeur : ferme le socket principal et tous les clients
 Server::~Server()
 {
@@ -67,6 +71,15 @@ Server::~Server()
 	}
 }
 
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+//--------------------------------------------------------------------SERVEUR EN ROUTE--------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
 // Gère les nouvelles connexions clients
 void Server::handleNewConnection()
 {
@@ -94,93 +107,66 @@ void Server::handleNewConnection()
 
 	std::cout << "🆕 Nouvelle connexion acceptée (FD : " << clientSocket << ")" << std::endl;
 }
+//--------------------------------------------------------------------------------------
+
 
 // Gère les messages envoyés par un client avec parsing puis envoi a  IRC_manager
 void Server::handleClientMessage(int clientFd)
 {
-	char buffer[512];
-	memset(buffer, 0, sizeof(buffer));
+    char buffer[512];
+    memset(buffer, 0, sizeof(buffer));
 
-	int bytesReceived = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
-	if (bytesReceived <= 0)
-	{
-		std::cout << "❌ Client déconnecté (FD : " << clientFd << ")" << std::endl;
-		removeClient(clientFd);
-		ircManager.removeUser(clientFd);
-		return;
-	}
-
-	std::string message(buffer);
-	std::vector<std::string> command = parser.parseCommand(message);
-
-	if (!command.empty())
-	{
-		std::cout << "🔍 Commande reçue : " << command[0] << std::endl;
-		User *user = ircManager.getUser(clientFd);
-
-		if (!user)
-			return;
-
-		if (command[0] == "NICK" && command.size() > 1)
-			ircManager.nickCommand(clientFd, command[1]);
-		else if (command[0] == "USER" && command.size() > 1)
-			ircManager.userCommand(clientFd, command[1]);
-
-		// ✅ Vérification avant toute action
-		else if (!user->isAuthenticated())
-		{
-			std::string errorMsg = "❌ Vous devez vous authentifier avec NICK et USER !\n";
-			send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
-		}
-		else if (command[0] == "JOIN" && command.size() > 1)
-			ircManager.joinCommand(clientFd, command[1]);
-		else if (command[0] == "PART" && command.size() > 1)
-			ircManager.partCommand(clientFd, command[1]);
-		else if (command[0] == "PRIVMSG" && command.size() > 2)
-			ircManager.privmsgCommand(clientFd, command[1], command[2]);
-        else if (command[0] == "MODE" && command.size() > 2)
-        {
-            std::string param = (command.size() > 3) ? command[3] : "";
-            ircManager.modeCommand(clientFd, command[1], command[2], param);
-        }
-
-	}
-}
-
-// Supprime un client qui s'est déconnecté
-void Server::removeClient(int clientFd)
-{
-    close(clientFd);
-
-    //Supprimer le client de _pollFds
-    for (size_t i = 0; i < _pollFds.size(); i++)
+    int bytesReceived = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
+    if (bytesReceived <= 0)
     {
-        if (_pollFds[i].fd == clientFd)
-        {
-            _pollFds.erase(_pollFds.begin() + i);
-            break;
-        }
+        std::cout << "❌ Client déconnecté (FD : " << clientFd << ")" << std::endl;
+        removeClient(clientFd);
+        ircManager.removeUser(clientFd);
+        return;
     }
 
-    //Faire quitter tous les canaux à l'utilisateur avant de le supprimer
+    std::string message(buffer);
+    Parsing parsedMessage;  // Créer une instance de Parsing
+    parsedMessage.parseCommand(message);  // Appeler parseCommand pour découper le message
+
+    std::cout << "🔍 Prefix reçue : " << parsedMessage.prefix << std::endl;
+    std::cout << "🔍 Commande reçue : " << parsedMessage.command << std::endl;
+    std::cout << "🔍 Parametres reçue : " << parsedMessage.params << std::endl;
+    std::cout << "🔍 Suffixe reçue : " << parsedMessage.suffix << std::endl;
+
     User *user = ircManager.getUser(clientFd);
-    if (user)
+
+    if (!user)
+        return;
+
+    if (parsedMessage.command == "NICK" && !parsedMessage.params.empty())
+        ircManager.nickCommand(clientFd, parsedMessage.params);
+    else if (parsedMessage.command == "USER" && !parsedMessage.params.empty())
+        ircManager.userCommand(clientFd, parsedMessage.params);
+
+    // Vérification de l'authentification avant de traiter d'autres commandes
+    else if (!user->isAuthenticated())
     {
-        for (std::map<std::string, Channel*>::iterator it = ircManager.getChannels().begin(); it != ircManager.getChannels().end(); ++it)
+        std::string errorMsg = "❌ Vous devez vous authentifier avec NICK et USER !\n";
+        send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
+    }
+    else if (parsedMessage.command == "JOIN" && !parsedMessage.params.empty())
+        ircManager.joinCommand(clientFd, parsedMessage.params);
+    else if (parsedMessage.command == "PART" && !parsedMessage.params.empty())
+        ircManager.partCommand(clientFd, parsedMessage.params);
+    else if (parsedMessage.command == "PRIVMSG" && !parsedMessage.params.empty())
+    {
+        // Séparer le canal et le message dans `params`
+        size_t spacePos = parsedMessage.params.find(' ');
+        if (spacePos != std::string::npos)
         {
-            if (it->second->isMember(user))
-            {
-                ircManager.partCommand(clientFd, it->first);
-            }
+            std::string channel = parsedMessage.params.substr(0, spacePos);
+            std::string message = parsedMessage.params.substr(spacePos + 1);
+            ircManager.privmsgCommand(clientFd, channel, message);
         }
     }
-
-    //Supprimer le client de IRCManager
-    ircManager.removeUser(clientFd);
 }
-
-
-
+//------------------------------------------------------------------------------------------
 
 // Boucle principale du serveur
 void Server::run()
@@ -206,6 +192,73 @@ void Server::run()
 		}
 	}
 }
+//----------------------------------------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+//--------------------------------------------------------------------DECONEXION D UN CLIENT-----------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------
+// Supprime un client qui s'est déconnecté
+void Server::removeClient(int clientFd)
+{
+    close(clientFd);
+
+    //Supprimer le client de _pollFds
+    for (size_t i = 0; i < _pollFds.size(); i++)
+    {
+        if (_pollFds[i].fd == clientFd)
+        {
+            _pollFds.erase(_pollFds.begin() + i);
+            break;
+        }
+    }
+
+
+
+
+
+    //Faire quitter tous les canaux à l'utilisateur avant de le supprimer
+    User *user = ircManager.getUser(clientFd);
+    if (user)
+    {
+        for (std::map<std::string, Channel*>::iterator it = ircManager.getChannels().begin(); it != ircManager.getChannels().end(); ++it)
+        {
+            if (it->second->isMember(user))
+            {
+                ircManager.partCommand(clientFd, it->first);
+            }
+        }
+    }
+
+    //Supprimer le client de IRCManager
+    ircManager.removeUser(clientFd);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
 -----------------------------------------------------------ETAPES-----------------------------------
 1️⃣ Initialisation du serveur (Server::Server())
