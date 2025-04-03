@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/03 15:15:05 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/03 16:22:32 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,27 +139,49 @@ void Server::handleClientMessage(int clientFd)
 			ircManager.partCommand(clientFd, command[1]);
 		else if (command[0] == "PRIVMSG" && command.size() > 2)
 			ircManager.privmsgCommand(clientFd, command[1], command[2]);
+        else if (command[0] == "MODE" && command.size() > 2) 
+        {
+            std::string param = (command.size() > 3) ? command[3] : "";
+            ircManager.modeCommand(clientFd, command[1], command[2], param);
+        }
+            
 	}
 }
 
 // Supprime un client qui s'est déconnecté
 void Server::removeClient(int clientFd)
 {
-	close(clientFd);
+    close(clientFd);
 
-	// ✅ Supprimer le client de _pollFds
-	for (size_t i = 0; i < _pollFds.size(); i++)
-	{
-		if (_pollFds[i].fd == clientFd)
-		{
-			_pollFds.erase(_pollFds.begin() + i);
-			break;
-		}
-	}
+    //Supprimer le client de _pollFds
+    for (size_t i = 0; i < _pollFds.size(); i++)
+    {
+        if (_pollFds[i].fd == clientFd)
+        {
+            _pollFds.erase(_pollFds.begin() + i);
+            break;
+        }
+    }
 
-	//Supprimer le client de IRCManager
-	ircManager.removeUser(clientFd);
+    //Faire quitter tous les canaux à l'utilisateur avant de le supprimer
+    User *user = ircManager.getUser(clientFd);
+    if (user)
+    {
+        for (std::map<std::string, Channel*>::iterator it = ircManager.getChannels().begin(); it != ircManager.getChannels().end(); ++it)
+        {
+            if (it->second->isMember(user))
+            {
+                ircManager.partCommand(clientFd, it->first);
+            }
+        }
+    }
+
+    //Supprimer le client de IRCManager
+    ircManager.removeUser(clientFd);
 }
+
+
+
 
 // Boucle principale du serveur
 void Server::run()
