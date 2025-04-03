@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/02 22:22:36 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/03 15:17:24 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,4 +130,60 @@ void IRCManager::userCommand(int fd, const std::string &username)
 		if (!user->getNickname().empty())
 		user->setAuthenticated(true);
 	}
+}
+
+void IRCManager::modeCommand(int fd, const std::string &channelName, const std::string &mode, const std::string &param)
+{
+	User *user = getUser(fd);
+	if (!user || !user->isAuthenticated())
+	{
+		std::cout << "⛔️ Vous devez être authentifié !" << std::endl;
+		return;
+	}
+	Channel *channel = channels[channelName];
+	if (!channel)
+	{
+		std::cout << " Le Canal " << channelName << " n existe pas " << std::endl;
+		return;
+	}
+	if (!channel->isMember(user) || !user->getIsOperator())
+	{
+		std::cout << "⛔️ Seuls les opérateurs peuvent changer les modes du canal !" << std::endl;
+		return;
+	}
+	if (mode == "+i")
+		channel->setInviteOnly(true);
+	else if (mode == "-i")
+		channel->setInviteOnly(false);
+	else if (mode == "+t")
+		channel->setTopicRestricted(true);
+	else if (mode == "-t")
+		channel->setTopicRestricted(false);
+	else if (mode == "+k")
+		channel->setKey(param);
+	else if (mode == "-k")
+		channel->setKey("");
+	else if (mode == "+l")
+		channel->setUserLimit(std::atoi(param.c_str()));
+	else if (mode == "-l")
+		channel->setUserLimit(0);
+	else if (mode == "+o")
+	{
+		for (size_t i = 0; i < channel->getMembers().size(); i++)
+		{
+			User *member = channel->getMembers()[i];
+			if (member->getNickname() == param)
+				member->setOperator(true);
+		}
+	}
+	else if (mode == "-o")
+	{
+		for (size_t i = 0; i < channel->getMembers().size(); i++)
+		{
+			User *member = channel->getMembers()[i];
+			if (member->getNickname() == param)
+				member->setOperator(false);
+		}
+	}
+	std::cout << "✅ Mode " << mode << " appliqué sur " << channelName << " avec paramètre : " << param << std::endl;
 }

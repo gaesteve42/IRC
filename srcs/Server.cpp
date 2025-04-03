@@ -3,199 +3,187 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/02 22:23:22 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/03 15:15:05 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Server.hpp"
 #include "../Includes/Parsing.hpp"
 
-
 // Constructeur du serveur
-Server::Server(int port) : _port(port) 
+Server::Server(int port) : _port(port)
 {
-    // Création du socket du serveur
-    _serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (_serverSocket < 0) 
-    {
-        std::cerr << "❌Erreur❌ : Impossible de créer le socket" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+	// Création du socket du serveur
+	_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+	if (_serverSocket < 0)
+	{
+		std::cerr << "❌Erreur❌ : Impossible de créer le socket" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 
-    // Permet de réutiliser rapidement l'adresse et le port après un arrêt
-    int opt = 1;
-    setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+	// Permet de réutiliser rapidement l'adresse et le port après un arrêt
+	int opt = 1;
+	setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
-    // Configuration de l'adresse du serveur
-    struct sockaddr_in serverAddr;
-    memset(&serverAddr, 0, sizeof(serverAddr));
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_addr.s_addr = INADDR_ANY;
-    serverAddr.sin_port = htons(_port);
+	// Configuration de l'adresse du serveur
+	struct sockaddr_in serverAddr;
+	memset(&serverAddr, 0, sizeof(serverAddr));
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_addr.s_addr = INADDR_ANY;
+	serverAddr.sin_port = htons(_port);
 
-    // Attacher le socket à l'adresse et au port
-    if (bind(_serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) 
-    {
-        std::cerr << "❌Erreur❌ : Bind échoué" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+	// Attacher le socket à l'adresse et au port
+	if (bind(_serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0)
+	{
+		std::cerr << "❌Erreur❌ : Bind échoué" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 
-    // Écoute des connexions entrantes
-    if (listen(_serverSocket, 10) < 0) 
-    {
-        std::cerr << "❌Erreur❌ : Listen échoué" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+	// Écoute des connexions entrantes
+	if (listen(_serverSocket, 10) < 0)
+	{
+		std::cerr << "❌Erreur❌ : Listen échoué" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 
-    // Ajouter le socket du serveur à poll()
-    struct pollfd serverPollFd;
-    serverPollFd.fd = _serverSocket;
-    serverPollFd.events = POLLIN;
-    _pollFds.push_back(serverPollFd);
+	// Ajouter le socket du serveur à poll()
+	struct pollfd serverPollFd;
+	serverPollFd.fd = _serverSocket;
+	serverPollFd.events = POLLIN;
+	_pollFds.push_back(serverPollFd);
 
-    std::cout << "✅ Serveur lancé sur le port " << _port << std::endl;
+	std::cout << "✅ Serveur lancé sur le port " << _port << std::endl;
 }
-
-
-
 
 // Destructeur : ferme le socket principal et tous les clients
-Server::~Server() 
+Server::~Server()
 {
-    close(_serverSocket);
-    for (size_t i = 0; i < _pollFds.size(); i++) 
-    {
-        close(_pollFds[i].fd);
-    }
+	close(_serverSocket);
+	for (size_t i = 0; i < _pollFds.size(); i++)
+	{
+		close(_pollFds[i].fd);
+	}
 }
-
-
 
 // Gère les nouvelles connexions clients
-void Server::handleNewConnection() 
+void Server::handleNewConnection()
 {
-    struct sockaddr_in clientAddr;
-    socklen_t clientAddrSize = sizeof(clientAddr);
+	struct sockaddr_in clientAddr;
+	socklen_t clientAddrSize = sizeof(clientAddr);
 
-    int clientSocket = accept(_serverSocket, (struct sockaddr*)&clientAddr, &clientAddrSize);
-    if (clientSocket < 0) 
-    {
-        std::cerr << "⚠️ Erreur : Accept échoué" << std::endl;
-        return;
-    }
+	int clientSocket = accept(_serverSocket, (struct sockaddr*)&clientAddr, &clientAddrSize);
+	if (clientSocket < 0)
+	{
+		std::cerr << "⚠️ Erreur : Accept échoué" << std::endl;
+		return;
+	}
 
-    // Mettre le socket en mode non bloquant
-    fcntl(clientSocket, F_SETFL, O_NONBLOCK);
+	// Mettre le socket en mode non bloquant
+	fcntl(clientSocket, F_SETFL, O_NONBLOCK);
 
-    // Ajouter le client à poll()
-    struct pollfd clientPollFd;
-    clientPollFd.fd = clientSocket;
-    clientPollFd.events = POLLIN;
-    _pollFds.push_back(clientPollFd);
+	// Ajouter le client à poll()
+	struct pollfd clientPollFd;
+	clientPollFd.fd = clientSocket;
+	clientPollFd.events = POLLIN;
+	_pollFds.push_back(clientPollFd);
 
-    // Création du User dans IRCManager
-    IRCManager.newUser(clientSocket);
+	// Création du User dans IRCManager
+	ircManager.newUser(clientSocket);
 
-    std::cout << "🆕 Nouvelle connexion acceptée (FD : " << clientSocket << ")" << std::endl;
+	std::cout << "🆕 Nouvelle connexion acceptée (FD : " << clientSocket << ")" << std::endl;
 }
-
 
 // Gère les messages envoyés par un client avec parsing puis envoi a  IRC_manager
-void Server::handleClientMessage(int clientFd) 
+void Server::handleClientMessage(int clientFd)
 {
-    char buffer[512];
-    memset(buffer, 0, sizeof(buffer));
+	char buffer[512];
+	memset(buffer, 0, sizeof(buffer));
 
-    int bytesReceived = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
-    if (bytesReceived <= 0) 
-    {
-        std::cout << "❌ Client déconnecté (FD : " << clientFd << ")" << std::endl;
-        removeClient(clientFd);
-        IRCManager.removeUser(clientFd);
-        return;
-    }
+	int bytesReceived = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
+	if (bytesReceived <= 0)
+	{
+		std::cout << "❌ Client déconnecté (FD : " << clientFd << ")" << std::endl;
+		removeClient(clientFd);
+		ircManager.removeUser(clientFd);
+		return;
+	}
 
-    std::string message(buffer);
-    std::vector<std::string> command = parser.parseCommand(message);
+	std::string message(buffer);
+	std::vector<std::string> command = parser.parseCommand(message);
 
-    if (!command.empty()) 
-    {
-        std::cout << "🔍 Commande reçue : " << command[0] << std::endl;
-        User *user = IRCManager.getUser(clientFd);
-        
-        if (!user) 
-            return;
+	if (!command.empty())
+	{
+		std::cout << "🔍 Commande reçue : " << command[0] << std::endl;
+		User *user = ircManager.getUser(clientFd);
 
-        if (command[0] == "NICK" && command.size() > 1) 
-            IRCManager.nickCommand(clientFd, command[1]);
-        else if (command[0] == "USER" && command.size() > 1) 
-            IRCManager.userCommand(clientFd, command[1]);
+		if (!user)
+			return;
 
-        // ✅ Vérification avant toute action
-        else if (!user->getIsAuthenticated()) 
-        {
-            std::string errorMsg = "❌ Vous devez vous authentifier avec NICK et USER !\n";
-            send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
-        }
-        else if (command[0] == "JOIN" && command.size() > 1) 
-            IRCManager.joinCommand(clientFd, command[1]);
-        else if (command[0] == "PART" && command.size() > 1) 
-            IRCManager.partCommand(clientFd, command[1]);
-        else if (command[0] == "PRIVMSG" && command.size() > 2) 
-            IRCManager.privmsgCommand(clientFd, command[1], command[2]);
-    }
+		if (command[0] == "NICK" && command.size() > 1)
+			ircManager.nickCommand(clientFd, command[1]);
+		else if (command[0] == "USER" && command.size() > 1)
+			ircManager.userCommand(clientFd, command[1]);
+
+		// ✅ Vérification avant toute action
+		else if (!user->isAuthenticated())
+		{
+			std::string errorMsg = "❌ Vous devez vous authentifier avec NICK et USER !\n";
+			send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
+		}
+		else if (command[0] == "JOIN" && command.size() > 1)
+			ircManager.joinCommand(clientFd, command[1]);
+		else if (command[0] == "PART" && command.size() > 1)
+			ircManager.partCommand(clientFd, command[1]);
+		else if (command[0] == "PRIVMSG" && command.size() > 2)
+			ircManager.privmsgCommand(clientFd, command[1], command[2]);
+	}
 }
-
-
-
-
 
 // Supprime un client qui s'est déconnecté
-void Server::removeClient(int clientFd) 
+void Server::removeClient(int clientFd)
 {
-    close(clientFd);
-    
-    // ✅ Supprimer le client de _pollFds
-    for (size_t i = 0; i < _pollFds.size(); i++) 
-    {
-        if (_pollFds[i].fd == clientFd) 
-        {
-            _pollFds.erase(_pollFds.begin() + i);
-            break;
-        }
-    }
+	close(clientFd);
 
-    //Supprimer le client de IRCManager
-    IRCManager.removeUser(clientFd);
+	// ✅ Supprimer le client de _pollFds
+	for (size_t i = 0; i < _pollFds.size(); i++)
+	{
+		if (_pollFds[i].fd == clientFd)
+		{
+			_pollFds.erase(_pollFds.begin() + i);
+			break;
+		}
+	}
+
+	//Supprimer le client de IRCManager
+	ircManager.removeUser(clientFd);
 }
 
-
 // Boucle principale du serveur
-void Server::run() 
+void Server::run()
 {
-    while (true) 
-    {
-        int pollCount = poll(_pollFds.data(), _pollFds.size(), -1);
-        if (pollCount < 0) 
-        {
-            std::cerr << "⚠️❌ Erreur : poll() a échoué" << std::endl;
-            exit(EXIT_FAILURE);
-        }
+	while (true)
+	{
+		int pollCount = poll(_pollFds.data(), _pollFds.size(), -1);
+		if (pollCount < 0)
+		{
+			std::cerr << "⚠️❌ Erreur : poll() a échoué" << std::endl;
+			exit(EXIT_FAILURE);
+		}
 
-        for (size_t i = 0; i < _pollFds.size(); i++) 
-        {
-            if (_pollFds[i].revents & POLLIN) 
-            {
-                if (_pollFds[i].fd == _serverSocket) 
-                    handleNewConnection();
-                else 
-                    handleClientMessage(_pollFds[i].fd);
-            }
-        }
-    }
+		for (size_t i = 0; i < _pollFds.size(); i++)
+		{
+			if (_pollFds[i].revents & POLLIN)
+			{
+				if (_pollFds[i].fd == _serverSocket)
+					handleNewConnection();
+				else
+					handleClientMessage(_pollFds[i].fd);
+			}
+		}
+	}
 }
 /*
 -----------------------------------------------------------ETAPES-----------------------------------
@@ -361,7 +349,7 @@ struct pollfd serverPollFd;
 Déclare une structure pollfd qui représente un descripteur de fichier surveillé par poll().
 
 Cette structure contient trois champs :
-struct pollfd 
+struct pollfd
 {
     int   fd;      // Descripteur de fichier (socket ici)
     short events;  // Événements surveillés (lecture, écriture, etc.)

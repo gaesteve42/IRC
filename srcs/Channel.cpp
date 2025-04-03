@@ -6,15 +6,13 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:21 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/02 14:17:54 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/03 14:59:23 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Channel.hpp"
 
-Channel::Channel(const std::string &name)
-	: channelName(name), topic(""), key(""), inviteOnly(false),
-	  topicRestricted(false), userLimit(0) {}
+Channel::Channel(const std::string &name) : channelName(name), topic(""), key(""), inviteOnly(false), topicRestricted(false), userLimit(0) {}
 
 // Ajoute un membre au canal s'il y a de la place et qu'il n'est pas déjà membre
 bool Channel::addMember(User *user)
