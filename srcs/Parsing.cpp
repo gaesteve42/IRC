@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:17:03 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/03 16:59:00 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/03 19:06:47 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,89 @@ void Parsing::parseCommand(const std::string &message)
         params = message;
     }
 }
+
+
+// Préparer la commande PRIVMSG (séparation du canal et du message)
+bool Parsing::preparePRIVMSG(const std::string &params, std::string &channel, std::string &message)
+{
+    size_t spacePos = params.find(' ');
+    if (spacePos != std::string::npos)
+    {
+        channel = params.substr(0, spacePos);
+        message = params.substr(spacePos + 1);
+        return true;
+    }
+    return false;
+}
+
+
+
+bool Parsing::prepareMODE(const std::string &params, std::string &channelName, std::string &mode, std::string &param)
+{
+    size_t spacePos = params.find(' ');
+    if (spacePos != std::string::npos)
+    {
+        channelName = params.substr(0, spacePos);
+        std::string modeAndParam = params.substr(spacePos + 1);
+
+        size_t modePos = modeAndParam.find(' ');
+        if (modePos != std::string::npos)
+        {
+            mode = modeAndParam.substr(0, modePos);
+            param = modeAndParam.substr(modePos + 1);
+        }
+        else
+        {
+            mode = modeAndParam;  // Pas de paramètre, donc mode seul
+            param = "";
+        }
+        return true;
+    }
+    return false;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*POUR TESTER DANS UN MAIN
 Parsing parser;

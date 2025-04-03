@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/03 17:18:53 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/03 19:06:47 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,36 +81,6 @@ Server::~Server()
 //--------------------------------------------------------------------SERVEUR EN ROUTE--------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 // Gère les nouvelles connexions clients
-void Server::handleNewConnection()
-{
-	struct sockaddr_in clientAddr;
-	socklen_t clientAddrSize = sizeof(clientAddr);
-
-	int clientSocket = accept(_serverSocket, (struct sockaddr*)&clientAddr, &clientAddrSize);
-	if (clientSocket < 0)
-	{
-		std::cerr << "⚠️ Erreur : Accept échoué" << std::endl;
-		return;
-	}
-
-	// Mettre le socket en mode non bloquant
-	fcntl(clientSocket, F_SETFL, O_NONBLOCK);
-
-	// Ajouter le client à poll()
-	struct pollfd clientPollFd;
-	clientPollFd.fd = clientSocket;
-	clientPollFd.events = POLLIN;
-	_pollFds.push_back(clientPollFd);
-
-	// Création du User dans IRCManager
-	ircManager.newUser(clientSocket);
-
-	std::cout << "🆕 Nouvelle connexion acceptée (FD : " << clientSocket << ")" << std::endl;
-}
-//--------------------------------------------------------------------------------------
-
-
-// Gère les messages envoyés par un client avec parsing puis envoi a  IRC_manager
 void Server::handleClientMessage(int clientFd)
 {
     char buffer[512];
@@ -126,46 +96,75 @@ void Server::handleClientMessage(int clientFd)
     }
 
     std::string message(buffer);
-    Parsing parsedMessage;  // Créer une instance de Parsing
-    parsedMessage.parseCommand(message);  // Appeler parseCommand pour découper le message
-
-    std::cout << "🔍 Prefix reçue : " << parsedMessage.prefix << std::endl;
-    std::cout << "🔍 Commande reçue : " << parsedMessage.command << std::endl;
-    std::cout << "🔍 Parametres reçue : " << parsedMessage.params << std::endl;
-    std::cout << "🔍 Suffixe reçue : " << parsedMessage.suffix << std::endl;
+    Parsing parsedMessage;
+    parsedMessage.parseCommand(message);  // Découpe le message en prefix, command, params, suffix
 
     User *user = ircManager.getUser(clientFd);
 
     if (!user)
         return;
 
-    if (parsedMessage.command == "NICK" && !parsedMessage.params.empty())
-        ircManager.nickCommand(clientFd, parsedMessage.params);
-    else if (parsedMessage.command == "USER" && !parsedMessage.params.empty())
-        ircManager.userCommand(clientFd, parsedMessage.params);
-
-    // Vérification de l'authentification avant de traiter d'autres commandes
-    else if (!user->isAuthenticated())
+    // Vérification des commandes avec un paramètre
+    if ((parsedMessage.command == "NICK" || parsedMessage.command == "USER" || parsedMessage.command == "JOIN" || 
+         parsedMessage.command == "PART") && parsedMessage.params.empty())
     {
-        std::string errorMsg = "❌ Vous devez vous authentifier avec NICK et USER !\n";
+        std::string errorMsg = ERR_NEEDMOREPARAMS(parsedMessage.command);
         send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
+        return;
     }
-    else if (parsedMessage.command == "JOIN" && !parsedMessage.params.empty())
-        ircManager.joinCommand(clientFd, parsedMessage.params);
-    else if (parsedMessage.command == "PART" && !parsedMessage.params.empty())
-        ircManager.partCommand(clientFd, parsedMessage.params);
-    else if (parsedMessage.command == "PRIVMSG" && !parsedMessage.params.empty())
+
+    // Traitement des commandes
+    if (parsedMessage.command == "NICK")
     {
-        // Séparer le canal et le message dans `params`
-        size_t spacePos = parsedMessage.params.find(' ');
-        if (spacePos != std::string::npos)
+        ircManager.nickCommand(clientFd, parsedMessage.params);
+    }
+    else if (parsedMessage.command == "USER")
+    {
+        ircManager.userCommand(clientFd, parsedMessage.params);
+    }
+    else if (parsedMessage.command == "JOIN")
+    {
+        ircManager.joinCommand(clientFd, parsedMessage.params);
+    }
+    else if (parsedMessage.command == "PART")
+    {
+        ircManager.partCommand(clientFd, parsedMessage.params);
+    }
+    else if (parsedMessage.command == "PRIVMSG")
+    {
+        std::string channel, message;
+        if (parsedMessage.preparePRIVMSG(parsedMessage.params, channel, message))
         {
-            std::string channel = parsedMessage.params.substr(0, spacePos);
-            std::string message = parsedMessage.params.substr(spacePos + 1);
             ircManager.privmsgCommand(clientFd, channel, message);
         }
+        else
+        {
+            std::string errorMsg = ERR_NEEDMOREPARAMS(parsedMessage.command);
+            send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
+        }
+    }
+    else if (parsedMessage.command == "MODE")
+    {
+        std::string channelName, mode, param;
+        if (parsedMessage.prepareMODE(parsedMessage.params, channelName, mode, param))
+        {
+            ircManager.modeCommand(clientFd, channelName, mode, param);
+        }
+        else
+        {
+            std::string errorMsg = ERR_NEEDMOREPARAMS(parsedMessage.command);
+            send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
+        }
+    }
+    else
+    {
+        std::string errorMsg = ERR_UNKNOWNCOMMAND(parsedMessage.command);
+        send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
     }
 }
+
+
+
 //------------------------------------------------------------------------------------------
 
 // Boucle principale du serveur
@@ -219,7 +218,7 @@ void Server::removeClient(int clientFd)
 
 
 
-    //Faire quitter tous les canaux à l'utilisateur avant de le supprimer
+    /*Faire quitter tous les canaux à l'utilisateur avant de le supprimer VOIR AVEC LE GOAT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     User *user = ircManager.getUser(clientFd);
     if (user)
     {
@@ -230,7 +229,7 @@ void Server::removeClient(int clientFd)
                 ircManager.partCommand(clientFd, it->first);
             }
         }
-    }
+    }*/
 
     //Supprimer le client de IRCManager
     ircManager.removeUser(clientFd);
