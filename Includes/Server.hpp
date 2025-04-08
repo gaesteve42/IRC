@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:05:58 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/03 16:59:32 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/08 17:19:12 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ class Server
 private:
     int _serverSocket;                  // Socket principal du serveur
     int _port;                           // Port sur lequel on écoute
+    std::string _pass;                     // password pour se connecter
     std::vector<struct pollfd> _pollFds; // Liste des sockets surveillés avec poll()
 
     void handleNewConnection();          // Gère les nouvelles connexions
@@ -29,7 +30,7 @@ private:
     IRCManager ircManager;
 
 public:
-    Server(int port);
+    Server(int port, std::string pass);
     ~Server();
     void run();  // Boucle principale du serveur
 };

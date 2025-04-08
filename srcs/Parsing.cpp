@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:17:03 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/07 21:04:00 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/08 17:06:52 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,70 +27,69 @@ void Parsing::parseCommand(const std::string &message)
     while (std::getline(stream, line, '\n')) // getline retire le \n
     {
         // Nettoyer les caractères de fin de ligne '\r' ou '\n' (ceux qui peuvent rester en fin de ligne)
-        if (!line.empty() && line.back() == '\r')
-            line.pop_back();  // Retirer le '\r' si présent
+        if (!line.empty() && line[line.size() - 1] == '\r')
+            line.erase(line.size() - 1);  // Retirer le '\r' si présent
 
         // Traiter chaque ligne (commande) après nettoyage
         parseSingleCommand(line);
     }
 }
 
-void Parsing::parseSingleCommand(const std::string &message)
+void Parsing::parseSingleCommand(const std::string &msg)
 {
-    // Retirer les caractères de fin de ligne éventuels
-    std::string trimmedMessage = message;
-    if (trimmedMessage.back() == '\n')
-        trimmedMessage.pop_back();  // Retirer '\n'
-    if (trimmedMessage.back() == '\r')
-        trimmedMessage.pop_back();  // Retirer '\r'
+	// Copie locale modifiable du message
+	std::string message = msg;
 
+	// Retirer les caractères de fin de ligne éventuels
+	if (!message.empty() && message[message.size() - 1] == '\n')
+		message.erase(message.size() - 1);
+	if (!message.empty() && message[message.size() - 1] == '\r')
+		message.erase(message.size() - 1);
 
-    // Initialiser toutes les variables membres à vide
-    prefix.clear();
-    command.clear();
-    params.clear();
-    suffix.clear();
+	// Initialiser toutes les variables membres
+	prefix = "";
+	command = "";
+	params = "";
+	suffix = "";
 
-    std::istringstream stream(message);
-    std::string temp;
+	std::string temp;
 
-    // Partie 1 : Préfixe (si présent)
-    if (message[0] == ':')
-    {
-        size_t spacePos = message.find(' ');
-        if (spacePos != std::string::npos)
-        {
-            prefix = message.substr(1, spacePos - 1);
-            message = message.substr(spacePos + 1);  // Le message sans le préfixe
-        }
-    }
+	// Partie 1 : Préfixe (si présent)
+	if (!message.empty() && message[0] == ':')
+	{
+		size_t spacePos = message.find(' ');
+		if (spacePos != std::string::npos)
+		{
+			prefix = message.substr(1, spacePos - 1);
+			message = message.substr(spacePos + 1); // OK : la copie est modifiable
+		}
+	}
 
-    // Partie 2 : Commande (jusqu'au premier espace)
-    size_t spacePos = message.find(' ');
-    if (spacePos != std::string::npos)
-    {
-        command = message.substr(0, spacePos);
-        message = message.substr(spacePos + 1);
-    }
-    else
-    {
-        command = message;
-        message.clear();
-    }
+	// Partie 2 : Commande
+	size_t spacePos = message.find(' ');
+	if (spacePos != std::string::npos)
+	{
+		command = message.substr(0, spacePos);
+		message = message.substr(spacePos + 1);
+	}
+	else
+	{
+		command = message;
+		message = ""; // pour C++98
+	}
 
-    // Partie 3 : Paramètres (tout avant ":")
-    size_t colonPos = message.find(':');
-    if (colonPos != std::string::npos)
-    {
-        params = message.substr(0, colonPos);
-        suffix = message.substr(colonPos + 1);  // Le suffixe après ":"
-    }
-    else
-    {
-        params = message;
-    }
+	// Partie 3 : Paramètres et suffixe
+	size_t colonPos = message.find(':');
+	if (colonPos != std::string::npos)
+	{
+		params = message.substr(0, colonPos);
+		suffix = message.substr(colonPos + 1);
+	}
+	else
+	{
+		params = message;
+	}
 }
-
 
 // Préparer la commande PRIVMSG (séparation du canal et du message)
 bool Parsing::preparePRIVMSG(const std::string &params, std::string &channel, std::string &message)

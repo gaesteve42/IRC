@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:16:35 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/07 21:04:00 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/08 16:07:36 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ class Parsing
         bool prepareMODE(const std::string &params, std::string &channelName, std::string &mode, std::string &param);
         bool prepareKICK(const std::string &params, std::string &channel, std::string &target, std::string &reason);
         bool prepareINVITE(const std::string &params, std::string &channel, std::string &target);
-        bool prepareTOPIC(const std::string &params, std::string &channel, std::string &topic)
+        bool prepareTOPIC(const std::string &params, std::string &channel, std::string &topic);
 };
 
 #endif

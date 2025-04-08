@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/07 21:13:45 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/08 17:13:45 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 //--------------------------------------------------------------------CONSTUCTION DU SERVEUR-----------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------
 // Constructeur du serveur
-Server::Server(int port) : _port(port)
+Server::Server(int port, std::string pass) : _port(port), _pass(pass)
 {
 	// Création du socket du serveur
 	_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -103,6 +103,35 @@ void Server::handleClientMessage(int clientFd)
 
     if (!user)
         return;
+
+    // Check si user a donné le bon mot de passe
+    if (!user->hasProvidedPassword())
+    {
+        if (parsedMessage.command == "PASS")
+        {
+            if (parsedMessage.params == _pass)
+            {
+                user->setHasProvidedPassword(true);
+                std::cout << "✅ Mot de passe accepté pour FD " << clientFd << std::endl;
+                return;
+            }
+            else
+            {
+                std::cout << "❌ Mauvais mot de passe pour FD " << clientFd << std::endl;
+                std::string err = "ERROR :Mot de passe incorrect\r\n";
+                send(clientFd, err.c_str(), err.length(), 0);
+                removeClient(clientFd);
+                ircManager.removeUser(clientFd);
+                return;
+            }
+        }
+        else
+        {
+            std::string err = "ERROR :Mot de passe requis\r\n";
+            send(clientFd, err.c_str(), err.length(), 0);
+            return;
+        }
+    }
 
     // Vérification des commandes avec un paramètre
     if ((parsedMessage.command == "NICK" || parsedMessage.command == "USER" || parsedMessage.command == "JOIN" || 
@@ -252,7 +281,7 @@ void Server::removeClient(int clientFd)
     User *user = ircManager.getUser(clientFd);
     if (user)
     {
-        for (std::map<std::string, Channel*>::iterator it = ircManager.getChannelName().begin(); it != ircManager.getChannelName().end(); ++it)
+        for (std::map<std::string, Channel*>::iterator it = ircManager.getChannels().begin(); it != ircManager.getChannels().end(); ++it)
         {
             if (it->second->isMember(user))
             {

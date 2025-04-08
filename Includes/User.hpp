@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:00 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/03 16:36:24 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/08 16:26:20 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ private:
 	std::string username;   // Nom réel de l'utilisateur (login système ou identifiant unique)
 	std::string hostname;   // Adresse IP ou nom d'hôte de l'utilisateur
 	bool isOperator;        // Indique si l'utilisateur a des droits spéciaux (opérateur)
+	bool _hasProvidedPassword; // Indique si le password est ok
 	bool authenticated;     // indique si le User est authentifié
 
 public:
@@ -34,6 +35,8 @@ public:
 	std::string getUsername() const;
 	std::string getHostname() const;
 	bool getIsOperator() const;
+	bool hasProvidedPassword() const;
+	void setHasProvidedPassword(bool val);
 	bool isAuthenticated() const;
 
 	// Setters (pour modifier les attributs privés)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:28:53 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/03 16:36:38 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/08 16:26:20 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ std::string User::getUsername() const { return username; }
 std::string User::getHostname() const { return hostname; }
 bool User::getIsOperator() const { return isOperator; }
 bool User::isAuthenticated() const { return authenticated; }
+bool User::hasProvidedPassword() const { return _hasProvidedPassword; }
+void User::setHasProvidedPassword(bool val) { _hasProvidedPassword = val; }
 
 // ===== Setters (modification des attributs privés) =====
 void User::setNickname(const std::string &nick) { nickname = nick; }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IRCManager.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/03 16:36:33 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/08 17:11:58 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,12 @@ User* IRCManager::getUser(int fd)
 		return users[fd];
 	return NULL;
 }
+
+std::map<std::string, Channel*> IRCManager::getChannels() const 
+{
+    return _channels;
+}
+
 
 void IRCManager::joinCommand(int fd, const std::string &channelName)
 {

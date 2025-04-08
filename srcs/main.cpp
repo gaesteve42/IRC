@@ -3,17 +3,54 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:28:56 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/03 16:36:37 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/08 16:27:17 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Include.hpp"
 
-//----------------------------------------TEST MAIN (GAUTHIER)----------------------------------------------------------
 
+#include "../Includes/Include.hpp"
+
+int main(int argc, char **argv)
+{
+    if (argc != 3)
+    {
+        std::cerr << "Usage: ./ircserv <port> <password>" << std::endl;
+        return 1;
+    }
+
+    int port = std::atoi(argv[1]);
+    if (port <= 0 || port > 65535)
+    {
+        std::cerr << "❌ Port invalide. Utilisez un port entre 1 et 65535." << std::endl;
+        return 1;
+    }
+
+    std::string password = argv[2];
+
+    try
+    {
+        Server ircServer(port, password);
+        ircServer.run();  // Lance la boucle principale
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Erreur : " << e.what() << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
+
+
+
+
+//----------------------------------------TEST MAIN (GAUTHIER)----------------------------------------------------------
+/*
 int main()
 {
 	IRCManager irc;
@@ -48,7 +85,7 @@ int main()
 	irc.removeUser(fd1);
 	irc.removeUser(fd2);
 	return 0;
-}
+}*/
 
 /*----------------------------------------TEST MAIN (YOAN)----------------------------------------------------------
 
