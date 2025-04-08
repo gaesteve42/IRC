@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:04:06 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/08 17:11:58 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/08 17:35:01 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ public:
 	IRCManager();
 	~IRCManager();
 
-	std::map<std::string, Channel*>& getChannels() const;
+	std::map<std::string, Channel*>& getChannels();
 	void newUser(int fd);
 	void removeUser(int fd);
 	User* getUser(int fd);

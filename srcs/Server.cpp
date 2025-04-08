@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/08 17:13:45 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/08 17:53:38 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -225,6 +225,32 @@ void Server::handleClientMessage(int clientFd)
     }
 }
 
+void Server::handleNewConnection()
+{
+    // Accepter la nouvelle connexion
+    struct sockaddr_in clientAddr;
+    socklen_t clientAddrLen = sizeof(clientAddr);
+    int clientFd = accept(_serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
+
+    if (clientFd < 0)
+    {
+        std::cerr << "❌ Erreur : échec de l'acceptation de la connexion" << std::endl;
+        return;
+    }
+
+    // Ajout du socket client à la liste de poll
+    struct pollfd clientPollFd;
+    clientPollFd.fd = clientFd;
+    clientPollFd.events = POLLIN;
+    _pollFds.push_back(clientPollFd);
+
+    std::cout << "✅ Nouveau client connecté (FD : " << clientFd << ")" << std::endl;
+
+    // Ajouter un nouvel utilisateur dans IRCManager (ou selon ta logique)
+    ircManager.newUser(clientFd);
+}
+
+
 
 
 //------------------------------------------------------------------------------------------
@@ -266,7 +292,7 @@ void Server::removeClient(int clientFd)
 {
     close(clientFd);
 
-    //Supprimer le client de _pollFds
+    // Supprimer le client de _pollFds
     for (size_t i = 0; i < _pollFds.size(); i++)
     {
         if (_pollFds[i].fd == clientFd)
@@ -276,21 +302,23 @@ void Server::removeClient(int clientFd)
         }
     }
 
-
-    //Faire quitter tous les canaux à l'utilisateur
+    // Faire quitter tous les canaux à l'utilisateur
     User *user = ircManager.getUser(clientFd);
     if (user)
     {
-        for (std::map<std::string, Channel*>::iterator it = ircManager.getChannels().begin(); it != ircManager.getChannels().end(); ++it)
+        std::map<std::string, Channel*>& channels = ircManager.getChannels();
+        std::map<std::string, Channel*>::iterator it;
+        for (it = channels.begin(); it != channels.end(); ++it)
         {
-            if (it->second->isMember(user))
+            Channel* channel = it->second;
+            if (channel->isMember(user))
             {
                 ircManager.partCommand(clientFd, it->first);
             }
         }
     }
 
-    //Supprimer le client de IRCManager
+    // Supprimer l'utilisateur de IRCManager
     ircManager.removeUser(clientFd);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------

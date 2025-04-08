@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/08 17:11:58 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/08 17:34:16 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,9 +46,9 @@ User* IRCManager::getUser(int fd)
 	return NULL;
 }
 
-std::map<std::string, Channel*> IRCManager::getChannels() const 
+std::map<std::string, Channel*> &IRCManager::getChannels()
 {
-    return _channels;
+    return channels;
 }
 
 
