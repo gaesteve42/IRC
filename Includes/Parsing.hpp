@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:16:35 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/03 19:06:47 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/07 21:04:00 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,12 @@ class Parsing
         std::string suffix;   // Suffixe (tout après ":")
 
         void parseCommand(const std::string &message);
+        void parseSingleCommand(const std::string &message);
         bool preparePRIVMSG(const std::string &params, std::string &channel, std::string &message);
         bool prepareMODE(const std::string &params, std::string &channelName, std::string &mode, std::string &param);
+        bool prepareKICK(const std::string &params, std::string &channel, std::string &target, std::string &reason);
+        bool prepareINVITE(const std::string &params, std::string &channel, std::string &target);
+        bool prepareTOPIC(const std::string &params, std::string &channel, std::string &topic)
 };
 
 #endif

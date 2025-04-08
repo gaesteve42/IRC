@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:17:03 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/03 19:06:47 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/07 21:04:00 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,26 @@ Parsing::Parsing() {}
 
 Parsing::~Parsing() {}
 
+
 void Parsing::parseCommand(const std::string &message)
+{
+    // Créer un flux à partir du message pour découper en plusieurs commandes
+    std::istringstream stream(message);
+    std::string line;
+
+    // Découper le message en plusieurs commandes séparées par "\r\n" ou "\n"
+    while (std::getline(stream, line, '\n')) // getline retire le \n
+    {
+        // Nettoyer les caractères de fin de ligne '\r' ou '\n' (ceux qui peuvent rester en fin de ligne)
+        if (!line.empty() && line.back() == '\r')
+            line.pop_back();  // Retirer le '\r' si présent
+
+        // Traiter chaque ligne (commande) après nettoyage
+        parseSingleCommand(line);
+    }
+}
+
+void Parsing::parseSingleCommand(const std::string &message)
 {
     // Retirer les caractères de fin de ligne éventuels
     std::string trimmedMessage = message;
@@ -111,6 +130,51 @@ bool Parsing::prepareMODE(const std::string &params, std::string &channelName, s
     }
     return false;
 }
+
+bool Parsing::prepareKICK(const std::string &params, std::string &channel, std::string &target, std::string &reason)
+{
+    size_t firstSpace = params.find(' ');
+    if (firstSpace == std::string::npos) return false;
+
+    size_t secondSpace = params.find(' ', firstSpace + 1);
+    if (secondSpace == std::string::npos) return false;
+
+    channel = params.substr(0, firstSpace);
+    target = params.substr(firstSpace + 1, secondSpace - firstSpace - 1);
+    reason = params.substr(secondSpace + 1);
+
+    return true;
+}
+
+bool Parsing::prepareINVITE(const std::string &params, std::string &channel, std::string &target)
+{
+    size_t spacePos = params.find(' ');
+    if (spacePos == std::string::npos) return false;
+
+    target = params.substr(0, spacePos);
+    channel = params.substr(spacePos + 1);
+
+    return true;
+}
+
+
+bool Parsing::prepareTOPIC(const std::string &params, std::string &channel, std::string &topic)
+{
+    size_t spacePos = params.find(' ');
+    if (spacePos == std::string::npos)
+    {
+        channel = params;
+        topic = "";  // Pas de sujet, on veut juste consulter
+    }
+    else
+    {
+        channel = params.substr(0, spacePos);
+        topic = params.substr(spacePos + 1);
+    }
+    return true;
+}
+
+
 
 
 

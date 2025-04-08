@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/03 19:06:47 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/07 21:13:45 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,7 @@ void Server::handleClientMessage(int clientFd)
         return;
     }
 
-    // Traitement des commandes
+    // Traitement des commandes----------------------------------------------------------
     if (parsedMessage.command == "NICK")
     {
         ircManager.nickCommand(clientFd, parsedMessage.params);
@@ -154,6 +154,39 @@ void Server::handleClientMessage(int clientFd)
         {
             std::string errorMsg = ERR_NEEDMOREPARAMS(parsedMessage.command);
             send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
+        }
+    }
+    else if (parsedMessage.command == "KICK")
+    {
+        std::string channel, target, reason;
+        if (parsedMessage.prepareKICK(parsedMessage.params, channel, target, reason))
+            ircManager.kickCommand(clientFd, channel, target, reason);
+        else
+        {
+            std::string err = ERR_NEEDMOREPARAMS("KICK");
+            send(clientFd, err.c_str(), err.length(), 0);
+        }
+    }
+    else if (parsedMessage.command == "INVITE")
+    {
+        std::string channel, target;
+        if (parsedMessage.prepareINVITE(parsedMessage.params, channel, target))
+            ircManager.inviteCommand(clientFd, channel, target);
+        else
+        {
+            std::string err = ERR_NEEDMOREPARAMS("INVITE");
+            send(clientFd, err.c_str(), err.length(), 0);
+        }
+    }
+    else if (parsedMessage.command == "TOPIC")
+    {
+        std::string channel, topic;
+        if (parsedMessage.prepareTOPIC(parsedMessage.params, channel, topic))
+            ircManager.topicCommand(clientFd, channel, topic);
+        else
+        {
+            std::string err = ERR_NEEDMOREPARAMS("TOPIC");
+            send(clientFd, err.c_str(), err.length(), 0);
         }
     }
     else
@@ -215,21 +248,18 @@ void Server::removeClient(int clientFd)
     }
 
 
-
-
-
-    /*Faire quitter tous les canaux à l'utilisateur avant de le supprimer VOIR AVEC LE GOAT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //Faire quitter tous les canaux à l'utilisateur
     User *user = ircManager.getUser(clientFd);
     if (user)
     {
-        for (std::map<std::string, Channel*>::iterator it = ircManager.getChannels().begin(); it != ircManager.getChannels().end(); ++it)
+        for (std::map<std::string, Channel*>::iterator it = ircManager.getChannelName().begin(); it != ircManager.getChannelName().end(); ++it)
         {
             if (it->second->isMember(user))
             {
                 ircManager.partCommand(clientFd, it->first);
             }
         }
-    }*/
+    }
 
     //Supprimer le client de IRCManager
     ircManager.removeUser(clientFd);
