@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IRCManager.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/08 17:34:16 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/08 17:58:02 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,8 @@ void IRCManager::newUser(int fd)
 {
 	User *user = new User();
 	users[fd] = user;
-	std::cout << "🔗 Nouveau User associé au socket FD " << fd << std::endl; // [TO REPLACE: send welcome message]
+	std::string msg = ":ircserv NOTICE * :Bienvenue sur le serveur IRC !\r\n";
+	send(fd, msg.c_str(), msg.length(), 0);
 }
 
 void IRCManager::removeUser(int fd)
@@ -35,7 +36,8 @@ void IRCManager::removeUser(int fd)
 	{
 		delete users[fd];
 		users.erase(fd);
-		std::cout << "❌ User supprimé (FD " << fd << ")" << std::endl; // [TO REPLACE: send quit message]
+		std::string msg = ":ircserv NOTICE * :Utilisateur déconnecté\r\n";
+		send(fd, msg.c_str(), msg.length(), 0);
 	}
 }
 
@@ -48,9 +50,8 @@ User* IRCManager::getUser(int fd)
 
 std::map<std::string, Channel*> &IRCManager::getChannels()
 {
-    return channels;
+	return channels;
 }
-
 
 void IRCManager::joinCommand(int fd, const std::string &channelName)
 {
@@ -60,7 +61,7 @@ void IRCManager::joinCommand(int fd, const std::string &channelName)
 	if (!user->isAuthenticated())
 	{
 		std::string msg = ERR_NOTREGISTERED();
-		std::cout << msg; // [TO REPLACE: send error message]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	if (channels.find(channelName) == channels.end())
@@ -69,17 +70,19 @@ void IRCManager::joinCommand(int fd, const std::string &channelName)
 	if (channel->isInviteOnly() && !channel->isInvited(user))
 	{
 		std::string msg = ERR_INVITEONLYCHAN(channelName);
-		std::cout << msg; // [TO REPLACE: send invite-only error]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	if (channel->addMember(user))
 	{
-		channel->removeInvite(user); // auto suppression de l'invitation
-		std::cout << "📌 " << user->getNickname() << " a rejoint " << channelName << std::endl; // [TO REPLACE: send join message]
+		channel->removeInvite(user); // supprime l invit direct
+		std::string msg = ":ircserv NOTICE " + user->getNickname() + " :Vous avez rejoint " + channelName + "\r\n";
+		send(fd, msg.c_str(), msg.length(), 0);
 	}
 	else
 	{
-		std::cout << "⚠️ " << user->getNickname() << " n'a pas pu rejoindre " << channelName << std::endl; // [TO REPLACE: send error message]
+		std::string msg = ERR_CHANNELISFULL(channelName);
+		send(fd, msg.c_str(), msg.length(), 0);
 	}
 }
 
@@ -91,13 +94,14 @@ void IRCManager::partCommand(int fd, const std::string &channelName)
 	if (!user->isAuthenticated())
 	{
 		std::string msg = ERR_NOTREGISTERED();
-		std::cout << msg; // [TO REPLACE: send error message]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	if (channels.find(channelName) != channels.end())
 	{
 		channels[channelName]->removeMember(user);
-		std::cout << "📌 " << user->getNickname() << " a quitté " << channelName << std::endl; // [TO REPLACE: send part message]
+		std::string msg = ":ircserv NOTICE " + user->getNickname() + " :Vous avez quitté " + channelName + "\r\n";
+		send(fd, msg.c_str(), msg.length(), 0);
 	}
 }
 
@@ -109,7 +113,7 @@ void IRCManager::privmsgCommand(int fd, const std::string &channelName, const st
 	if (!sender->isAuthenticated())
 	{
 		std::string msg = ERR_NOTREGISTERED();
-		std::cout << msg; // [TO REPLACE: send error message]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	if (channels.find(channelName) != channels.end())
@@ -120,8 +124,8 @@ void IRCManager::privmsgCommand(int fd, const std::string &channelName, const st
 			User *receiver = members[i];
 			if (receiver != sender)
 			{
-				std::cout << "💬 " << sender->getNickname() << " vers "
-						  << receiver->getNickname() << " : " << message << std::endl; // [TO REPLACE: send privmsg to receiver]
+				std::string msg = ":" + sender->getNickname() + " PRIVMSG " + channelName + " :" + message + "\r\n";
+				send(fd, msg.c_str(), msg.length(), 0);
 			}
 		}
 	}
@@ -133,7 +137,8 @@ void IRCManager::nickCommand(int fd, const std::string &nickname)
 	if (user)
 	{
 		user->setNickname(nickname);
-		std::cout << "✅ Nickname défini à " << nickname << " pour FD " << fd << std::endl; // [TO REPLACE: send nick confirmation]
+		std::string msg = ":ircserv 001 " + nickname + " :Nickname défini\r\n";
+		send(fd, msg.c_str(), msg.length(), 0);
 		if (!user->getUsername().empty())
 			user->setAuthenticated(true);
 	}
@@ -145,7 +150,8 @@ void IRCManager::userCommand(int fd, const std::string &username)
 	if (user)
 	{
 		user->setUsername(username);
-		std::cout << "✅ Username défini à " << username << " pour FD " << fd << std::endl; // [TO REPLACE: send user confirmation]
+		std::string msg = ":ircserv NOTICE " + user->getNickname() + " :Username défini\r\n";
+		send(fd, msg.c_str(), msg.length(), 0);
 		if (!user->getNickname().empty())
 			user->setAuthenticated(true);
 	}
@@ -157,20 +163,20 @@ void IRCManager::modeCommand(int fd, const std::string &channelName, const std::
 	if (!user || !user->isAuthenticated())
 	{
 		std::string msg = ERR_NOTREGISTERED();
-		std::cout << msg; // [TO REPLACE: send error message]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	Channel *channel = channels[channelName];
 	if (!channel)
 	{
 		std::string msg = ERR_NOSUCHCHANNEL(channelName);
-		std::cout << msg; // [TO REPLACE: send error message]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	if (!channel->isMember(user) || !user->getIsOperator())
 	{
 		std::string msg = ERR_CHANOPRIVSNEEDED(channelName);
-		std::cout << msg; // [TO REPLACE: send error message]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	if (mode == "+i")
@@ -207,7 +213,8 @@ void IRCManager::modeCommand(int fd, const std::string &channelName, const std::
 				member->setOperator(false);
 		}
 	}
-	std::cout << "✅ Mode " << mode << " appliqué sur " << channelName << " avec paramètre : " << param << std::endl; // [TO REPLACE: send mode confirmation]
+	std::string msg = ":ircserv 324 " + channelName + " " + mode + (param.empty() ? "" : " " + param) + "\r\n";
+	send(fd, msg.c_str(), msg.length(), 0);
 }
 
 void IRCManager::kickCommand(int fd, const std::string &channelName, const std::string &targetNick, const std::string &reason)
@@ -216,20 +223,20 @@ void IRCManager::kickCommand(int fd, const std::string &channelName, const std::
 	if (!sender || !sender->isAuthenticated())
 	{
 		std::string msg = ERR_NOTREGISTERED();
-		std::cout << msg; // [TO REPLACE: send error message]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	if (channels.find(channelName) == channels.end())
 	{
 		std::string msg = ERR_NOSUCHCHANNEL(channelName);
-		std::cout << msg; // [TO REPLACE: send error message]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	Channel *channel = channels[channelName];
 	if (!channel->isMember(sender) || !sender->getIsOperator())
 	{
 		std::string msg = ERR_CHANOPRIVSNEEDED(channelName);
-		std::cout << msg; // [TO REPLACE: send error message]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	User *target = NULL;
@@ -245,14 +252,12 @@ void IRCManager::kickCommand(int fd, const std::string &channelName, const std::
 	if (!target)
 	{
 		std::string msg = ERR_USERNOTINCHANNEL(targetNick, channelName);
-		std::cout << msg; // [TO REPLACE: send error message]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	channel->removeMember(target);
-	std::cout << "👢 " << sender->getNickname()
-			  << " a KICK " << target->getNickname()
-			  << " de " << channelName
-			  << " pour : " << reason << std::endl; // [TO REPLACE: send kick notice]
+	std::string msg = ":" + sender->getNickname() + " KICK " + channelName + " " + target->getNickname() + " :" + reason + "\r\n";
+	send(fd, msg.c_str(), msg.length(), 0);
 }
 
 void IRCManager::inviteCommand(int fd, const std::string &channelName, const std::string &targetNick)
@@ -261,20 +266,20 @@ void IRCManager::inviteCommand(int fd, const std::string &channelName, const std
 	if (!sender || !sender->isAuthenticated())
 	{
 		std::string msg = ERR_NOTREGISTERED();
-		std::cout << msg; // [TO REPLACE: send error message]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	if (channels.find(channelName) == channels.end())
 	{
 		std::string msg = ERR_NOSUCHCHANNEL(channelName);
-		std::cout << msg; // [TO REPLACE: send error message]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	Channel *channel = channels[channelName];
 	if (!channel->isMember(sender) || !sender->getIsOperator())
 	{
 		std::string msg = ERR_CHANOPRIVSNEEDED(channelName);
-		std::cout << msg; // [TO REPLACE: send error message]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	User *target = NULL;
@@ -289,11 +294,12 @@ void IRCManager::inviteCommand(int fd, const std::string &channelName, const std
 	if (!target)
 	{
 		std::string msg = ERR_NOSUCHNICK(targetNick);
-		std::cout << msg; // [TO REPLACE: send error message]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	channel->addInvite(target);
-	std::cout << "✉️  " << sender->getNickname() << " a invité " << targetNick << " dans " << channelName << std::endl; // [TO REPLACE: send invite]
+	std::string msg = ":" + sender->getNickname() + " INVITE " + target->getNickname() + " :" + channelName + "\r\n";
+	send(fd, msg.c_str(), msg.length(), 0);
 }
 
 void IRCManager::topicCommand(int fd, const std::string &channelName, const std::string &newTopic)
@@ -302,20 +308,20 @@ void IRCManager::topicCommand(int fd, const std::string &channelName, const std:
 	if (!user || !user->isAuthenticated())
 	{
 		std::string msg = ERR_NOTREGISTERED();
-		std::cout << msg; // [TO REPLACE: send error message]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	if (channels.find(channelName) == channels.end())
 	{
 		std::string msg = ERR_NOSUCHCHANNEL(channelName);
-		std::cout << msg; // [TO REPLACE: send error message]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	Channel *channel = channels[channelName];
 	if (!channel->isMember(user))
 	{
 		std::string msg = ERR_NOTONCHANNEL(channelName);
-		std::cout << msg; // [TO REPLACE: send error message]
+		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
 	if (newTopic.empty())
@@ -323,12 +329,12 @@ void IRCManager::topicCommand(int fd, const std::string &channelName, const std:
 		if (channel->getTopic().empty())
 		{
 			std::string msg = RPL_NOTOPIC(channelName);
-			std::cout << msg; // [TO REPLACE: send no topic info]
+			send(fd, msg.c_str(), msg.length(), 0);
 		}
 		else
 		{
 			std::string msg = RPL_TOPIC(channelName, channel->getTopic());
-			std::cout << msg; // [TO REPLACE: send current topic]
+			send(fd, msg.c_str(), msg.length(), 0);
 		}
 	}
 	else
@@ -336,10 +342,11 @@ void IRCManager::topicCommand(int fd, const std::string &channelName, const std:
 		if (channel->isTopicRestricted() && !user->getIsOperator())
 		{
 			std::string msg = ERR_CHANOPRIVSNEEDED(channelName);
-			std::cout << msg; // [TO REPLACE: send error message]
+			send(fd, msg.c_str(), msg.length(), 0);
 			return;
 		}
 		channel->setTopic(newTopic);
-		std::cout << "📝 Sujet de " << channelName << " changé en : " << newTopic << std::endl; // [TO REPLACE: send topic change]
+		std::string msg = ":" + user->getNickname() + " TOPIC " + channelName + " :" + newTopic + "\r\n";
+		send(fd, msg.c_str(), msg.length(), 0);
 	}
 }
