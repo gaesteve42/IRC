@@ -3,24 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:28:53 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/09 17:58:20 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/09 20:37:57 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Include.hpp"
 
 // Constructeur par défaut
-User::User() : fd(-1), nickname(""), username(""), hostname(""), isOperator(false), _hasProvidedPassword(false), authenticated(false) {}
+User::User() : fd(-1), nickname(""), username(""), hostname(""), isOperator(false), Password_is_ok(false), authenticated(false) {}
 
 //Constructeur avec fd
-User::User(int fd) : fd(fd), nickname(""), username(""), hostname(""), isOperator(false), _hasProvidedPassword(false), authenticated(false) {}
+User::User(int fd) : fd(fd), nickname(""), username(""), hostname(""), isOperator(false), Password_is_ok(false), authenticated(false) {}
 
 // Constructeur complet
 User::User(int fd, const std::string &nick, const std::string &user, const std::string &host)
-	: fd(fd), nickname(nick), username(user), hostname(host), isOperator(false), _hasProvidedPassword(false), authenticated(false) {}
+	: fd(fd), nickname(nick), username(user), hostname(host), isOperator(false), Password_is_ok(false), authenticated(false) {}
 
 // ===== Getters (accès en lecture aux attributs privés) =====
 std::string User::getNickname() const { return nickname; }

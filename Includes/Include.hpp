@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/03 15:29:54 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/09 13:34:11 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/09 21:55:12 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,8 @@
 
 // Format standard                        ":server_name CODE nickname :message\r\n"
 
+#define SERVER_NAME "ircserv"
+
 // ========================== 🔴 ERREURS ==========================
 
 #define ERR_NEEDMOREPARAMS(cmd)           (std::string("461 ") + cmd + " :Not enough parameters\r\n")
@@ -67,8 +69,16 @@
 
 #define RPL_TOPIC(chan, topic)            (std::string("332 ") + chan + " :" + topic + "\r\n")
 #define RPL_NOTOPIC(chan)                 (std::string("331 ") + chan + " :No topic is set\r\n")
-#define RPL_NAMREPLY(chan, names)         (std::string("353 = ") + chan + " :" + names + "\r\n")
-#define RPL_ENDOFNAMES(chan)              (std::string("366 ") + chan + " :End of /NAMES list\r\n")
+
+inline std::string RPL_NAMREPLY(const std::string& nick, const std::string& symbol, const std::string& channel, const std::string& names)
+{
+	return ":" + std::string(SERVER_NAME) + " 353 " + nick + " " + symbol + " " + channel + " :" + names + "\r\n";
+}
+inline std::string RPL_ENDOFNAMES(const std::string& nick, const std::string& channel)
+{
+	return ":" + std::string(SERVER_NAME) + " 366 " + nick + " " + channel + " :End of /NAMES list.\r\n";
+}
+
 
 #endif
 

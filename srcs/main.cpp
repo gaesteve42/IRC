@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:28:56 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/09 13:45:14 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/09 21:03:07 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,18 +14,11 @@
 
 volatile sig_atomic_t running = 1;
 /*
-pour faire simple : sig atomic t c'est un levier de frein à main, peu importe à quel point tu tires dessus il cassera pas
-et volatile c'est comme si on demande au compilateur de toujours vérifier l'état du levier
+VOLATILE
+à chaque boucle du serveur, on vérifie si on a reçu un signal pour stop.
 
-l'explication de tout ça par tonton :
-
-- - - - Pourquoi sig_atomic_t ? C’est un type spécial prévu pour être utilisé dans les signaux.
-Il garantit que la variable sera toujours mise à jour de manière cohérente et sûre,
-même dans le cas improbable où plusieurs signaux arrivent presque simultanément.
-
-- - - - Pourquoi volatile ? Pour demander explicitement au compilateur de ne jamais optimiser la lecture ou l'écriture de cette variable.
-La valeur sera toujours vérifiée directement, jamais "mise en cache". Ainsi, le programme peut réagir immédiatement et correctement au signal.
-
+SIG_ATOMIC_T
+sécurité quand la variable change par un signal.
 */
 
 void signalHandler(int signalNum)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IRCManager.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/09 17:58:20 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/09 21:55:05 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,8 +97,25 @@ void IRCManager::joinCommand(int fd, const std::string &channelName)
 	if (channel->addMember(user))
 	{
 		channel->removeInvite(user); // supprime l invit direct
-		std::string msg = ":ircserv NOTICE " + user->getNickname() + " :Vous avez rejoint " + channelName + "\r\n";
-		send(fd, msg.c_str(), msg.length(), 0);
+		// Message JOIN visible par tous les membres
+		std::string joinMsg = ":" + user->getNickname() + "!" + user->getUsername() + "@localhost JOIN :" + channelName + "\r\n";
+		// Envoyer à tous les membres (y compris celui qui rejoint)
+		const std::vector<User*>& members = channel->getMembers();
+		for (size_t i = 0; i < members.size(); ++i)
+		send(members[i]->getFd(), joinMsg.c_str(), joinMsg.length(), 0);
+		// Liste des pseudos du channel
+		std::string names;
+		for (size_t i = 0; i < members.size(); ++i)
+		{
+			names += members[i]->getNickname();
+			if (i + 1 < members.size())
+				names += " ";
+		}
+		// Réponse standard pour HexChat
+		std::string nameReply = RPL_NAMREPLY(user->getNickname(), "=", channelName, names);
+		std::string endReply = RPL_ENDOFNAMES(user->getNickname(), channelName);
+		send(fd, nameReply.c_str(), nameReply.length(), 0);
+		send(fd, endReply.c_str(), endReply.length(), 0);
 	}
 	else
 	{
@@ -148,7 +165,6 @@ void IRCManager::partCommand(int fd, const std::string &channelName)
 		channels.erase(it);
 	}
 }
-
 
 void IRCManager::privmsgCommand(int senderFd, const std::string& target, const std::string& message)
 {
@@ -214,7 +230,7 @@ void IRCManager::userCommand(int fd, const std::string &username)
 	if (user)
 	{
 		user->setUsername(username);
-		std::string msg = ":ircserv NOTICE " + user->getNickname() + " :Username défini\r\n";
+		std::string msg = ":ircserv NOTICE " + user->getUsername() + " :Username défini\r\n";
 		send(fd, msg.c_str(), msg.length(), 0);
 		if (!user->getNickname().empty())
 			user->setAuthenticated(true);
@@ -319,10 +335,15 @@ void IRCManager::kickCommand(int fd, const std::string &channelName, const std::
 		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
+	std::string prefix = ":" + sender->getNickname() + "!" + sender->getUsername() + "@localhost";
+	std::string msg = prefix + " KICK " + channelName + " " + target->getNickname() + " :" + reason + "\r\n";
+	for (size_t i = 0; i < members.size(); ++i)
+	{
+		send(members[i]->getFd(), msg.c_str(), msg.length(), 0);
+	}
 	channel->removeMember(target);
-	std::string msg = ":" + sender->getNickname() + " KICK " + channelName + " " + target->getNickname() + " :" + reason + "\r\n";
-	send(fd, msg.c_str(), msg.length(), 0);
 }
+
 
 void IRCManager::inviteCommand(int fd, const std::string &channelName, const std::string &targetNick)
 {
