@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:00 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/09 17:43:38 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/09 17:58:20 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,13 @@ class User
 {
 private:
 	int fd;
-	std::string nickname;
-	std::string username;
-	std::string hostname;
-	bool isOperator;
-	bool _hasProvidedPassword;
-	bool authenticated;
+	std::string nickname;   // Pseudonyme de l'utilisateur affiché dans les salons IRC
+	std::string username;   // Nom réel de l'utilisateur (login système ou identifiant unique)
+	std::string hostname;   // Adresse IP ou nom d'hôte de l'utilisateur
+	bool isOperator;        // Indique si l'utilisateur a des droits spéciaux (opérateur)
+	bool Password_is_ok; // Indique si le password est ok
+	bool authenticated;     // indique si le User est authentifié
+
 public:
 	// Constructeurs
 	User();
@@ -36,7 +37,6 @@ public:
 	std::string getHostname() const;
 	bool getIsOperator() const;
 	bool hasProvidedPassword() const;
-	void setHasProvidedPassword(bool val);
 	bool isAuthenticated() const;
 	int getFd() const;
 
@@ -45,6 +45,7 @@ public:
 	void setHostname(const std::string &host);
 	void setOperator(bool op);
 	void setAuthenticated(bool auth);
+	void setHasProvidedPassword(bool val);
 };
 
 #endif

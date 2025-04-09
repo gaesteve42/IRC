@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IRCManager.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/09 17:42:32 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/09 17:58:20 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void IRCManager::newUser(int fd)
 {
 	User *user = new User(fd);
 	users[fd] = user;
-	std::string msg = ":ircserv: Bienvenue sur le serveur IRC !\r\n";
+	std::string msg = ":ircserv NOTICE * :Bienvenue sur le serveur IRC_42 !\r\n";
 	send(fd, msg.c_str(), msg.length(), 0);
 }
 
@@ -83,7 +83,10 @@ void IRCManager::joinCommand(int fd, const std::string &channelName)
 		return;
 	}
 	if (channels.find(channelName) == channels.end())
+	{
 		channels[channelName] = new Channel(channelName);
+		user->setOperator(true);
+	}
 	Channel *channel = channels[channelName];
 	if (channel->isInviteOnly() && !channel->isInvited(user))
 	{

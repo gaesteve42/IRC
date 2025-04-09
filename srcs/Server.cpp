@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/09 17:33:25 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/09 17:58:20 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,7 +246,7 @@ void Server::handleNewConnection()
 
     std::cout << "✅ Nouveau client connecté (FD : " << clientFd << ")" << std::endl;
 
-    // Ajouter un nouvel utilisateur dans IRCManager (ou selon ta logique)
+    // Ajouter un nouvel utilisateur dans IRCManager
     ircManager.newUser(clientFd);
 }
 
