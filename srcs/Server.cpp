@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/08 17:53:38 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/09 13:39:01 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,7 +134,7 @@ void Server::handleClientMessage(int clientFd)
     }
 
     // Vérification des commandes avec un paramètre
-    if ((parsedMessage.command == "NICK" || parsedMessage.command == "USER" || parsedMessage.command == "JOIN" || 
+    if ((parsedMessage.command == "NICK" || parsedMessage.command == "USER" || parsedMessage.command == "JOIN" ||
          parsedMessage.command == "PART") && parsedMessage.params.empty())
     {
         std::string errorMsg = ERR_NEEDMOREPARAMS(parsedMessage.command);
@@ -255,18 +255,23 @@ void Server::handleNewConnection()
 
 //------------------------------------------------------------------------------------------
 
+extern volatile sig_atomic_t running;
 // Boucle principale du serveur
 void Server::run()
 {
-	while (true)
+	while (running)
 	{
 		int pollCount = poll(_pollFds.data(), _pollFds.size(), -1);
 		if (pollCount < 0)
 		{
-			std::cerr << "⚠️❌ Erreur : poll() a échoué" << std::endl;
-			exit(EXIT_FAILURE);
+			if (errno == EINTR)
+				break; // Quitte la boucle proprement
+			else
+			{
+				std::cerr << "⚠️❌ Erreur : poll() a échoué" << std::endl;
+				exit(EXIT_FAILURE);
+			}
 		}
-
 		for (size_t i = 0; i < _pollFds.size(); i++)
 		{
 			if (_pollFds[i].revents & POLLIN)
