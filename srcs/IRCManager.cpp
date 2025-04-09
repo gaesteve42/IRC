@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/08 17:58:02 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/09 17:42:32 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,9 @@ IRCManager::~IRCManager()
 
 void IRCManager::newUser(int fd)
 {
-	User *user = new User();
+	User *user = new User(fd);
 	users[fd] = user;
-	std::string msg = ":ircserv NOTICE * :Bienvenue sur le serveur IRC !\r\n";
+	std::string msg = ":ircserv: Bienvenue sur le serveur IRC !\r\n";
 	send(fd, msg.c_str(), msg.length(), 0);
 }
 
@@ -36,7 +36,7 @@ void IRCManager::removeUser(int fd)
 	{
 		delete users[fd];
 		users.erase(fd);
-		std::string msg = ":ircserv NOTICE * :Utilisateur déconnecté\r\n";
+		std::string msg = ":ircserv: Utilisateur déconnecté\r\n";
 		send(fd, msg.c_str(), msg.length(), 0);
 	}
 }
@@ -45,6 +45,24 @@ User* IRCManager::getUser(int fd)
 {
 	if (users.find(fd) != users.end())
 		return users[fd];
+	return NULL;
+}
+
+User* IRCManager::getUserByNick(const std::string& nickname)
+{
+	for (std::map<int, User*>::iterator it = users.begin(); it != users.end(); ++it)
+	{
+		if (it->second->getNickname() == nickname)
+			return it->second;
+	}
+	return NULL;
+}
+
+Channel* IRCManager::getChannel(const std::string& name)
+{
+	std::map<std::string, Channel*>::iterator it = channels.find(name);
+	if (it != channels.end())
+		return it->second;
 	return NULL;
 }
 
@@ -88,46 +106,89 @@ void IRCManager::joinCommand(int fd, const std::string &channelName)
 
 void IRCManager::partCommand(int fd, const std::string &channelName)
 {
-	User *user = getUser(fd);
-	if (!user)
-		return;
-	if (!user->isAuthenticated())
+	User* user = getUser(fd);
+	if (!user || !user->isAuthenticated())
 	{
 		std::string msg = ERR_NOTREGISTERED();
 		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
-	if (channels.find(channelName) != channels.end())
+	std::map<std::string, Channel*>::iterator it = channels.find(channelName);
+	if (it == channels.end())
 	{
-		channels[channelName]->removeMember(user);
-		std::string msg = ":ircserv NOTICE " + user->getNickname() + " :Vous avez quitté " + channelName + "\r\n";
+		std::string msg = ERR_NOSUCHCHANNEL(channelName);
 		send(fd, msg.c_str(), msg.length(), 0);
+		return;
+	}
+	Channel* channel = it->second;
+	if (!channel->isMember(user))
+	{
+		std::string msg = ERR_NOTONCHANNEL(channelName);
+		send(fd, msg.c_str(), msg.length(), 0);
+		return;
+	}
+	// Envoyer le message PART à tous les membres du canal
+	std::string prefix = ":" + user->getNickname() + "!" + user->getUsername() + "@localhost";
+	std::string partMsg = prefix + " PART " + channelName + "\r\n";
+
+	const std::vector<User*>& members = channel->getMembers();
+	for (size_t i = 0; i < members.size(); ++i)
+	{
+		send(members[i]->getFd(), partMsg.c_str(), partMsg.length(), 0);
+	}
+	// Retirer le membre du canal
+	channel->removeMember(user);
+	// Si le canal est vide → suppression
+	if (channel->getMembers().empty())
+	{
+		delete channel;
+		channels.erase(it);
 	}
 }
 
-void IRCManager::privmsgCommand(int fd, const std::string &channelName, const std::string &message)
+
+void IRCManager::privmsgCommand(int senderFd, const std::string& target, const std::string& message)
 {
-	User *sender = getUser(fd);
-	if (!sender)
+	User* sender = getUser(senderFd);
+	if (!sender || !sender->isAuthenticated())
 		return;
-	if (!sender->isAuthenticated())
+	std::string prefix = ":" + sender->getNickname() + "!" + sender->getUsername() + "@localhost PRIVMSG " + target + " :" + message + "\r\n";
+	// Cas 1 : C’est un channel
+	if (!target.empty() && (target[0] == '#' || target[0] == '&'))
 	{
-		std::string msg = ERR_NOTREGISTERED();
-		send(fd, msg.c_str(), msg.length(), 0);
-		return;
-	}
-	if (channels.find(channelName) != channels.end())
-	{
-		const std::vector<User*> &members = channels[channelName]->getMembers();
-		for (size_t i = 0; i < members.size(); i++)
+		Channel* chan = getChannel(target);
+		if (!chan)
 		{
-			User *receiver = members[i];
-			if (receiver != sender)
-			{
-				std::string msg = ":" + sender->getNickname() + " PRIVMSG " + channelName + " :" + message + "\r\n";
-				send(fd, msg.c_str(), msg.length(), 0);
-			}
+			std::string err = ERR_NOSUCHCHANNEL(target);
+			send(senderFd, err.c_str(), err.length(), 0);
+			return;
 		}
+		// Le client doit être dans le canal
+		if (!chan->isInChannel(senderFd))
+		{
+			std::string err = ERR_CANNOTSENDTOCHAN(target);
+			send(senderFd, err.c_str(), err.length(), 0);
+			return;
+		}
+		// Envoie à tous les membres sauf l’émetteur
+		const std::vector<User*>& members = chan->getMembers();
+		for (size_t i = 0; i < members.size(); ++i)
+		{
+			if (members[i]->getFd() != senderFd)
+				send(members[i]->getFd(), prefix.c_str(), prefix.length(), 0);
+		}
+	}
+	// Cas 2 : C’est un utilisateur
+	else
+	{
+		User* recipient = getUserByNick(target);
+		if (!recipient)
+		{
+			std::string err = ERR_NOSUCHNICK(target);
+			send(senderFd, err.c_str(), err.length(), 0);
+			return;
+		}
+		send(recipient->getFd(), prefix.c_str(), prefix.length(), 0);
 	}
 }
 

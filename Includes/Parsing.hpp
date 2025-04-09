@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:16:35 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/08 16:07:36 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/09 17:44:18 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ class Parsing
 
         void parseCommand(const std::string &message);
         void parseSingleCommand(const std::string &message);
-        bool preparePRIVMSG(const std::string &params, std::string &channel, std::string &message);
+		bool preparePRIVMSG(const std::string& params, const std::string& suffix, std::string& target, std::string& message);
         bool prepareMODE(const std::string &params, std::string &channelName, std::string &mode, std::string &param);
         bool prepareKICK(const std::string &params, std::string &channel, std::string &target, std::string &reason);
         bool prepareINVITE(const std::string &params, std::string &channel, std::string &target);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:17:03 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/08 17:06:52 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/09 17:33:29 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,19 +92,17 @@ void Parsing::parseSingleCommand(const std::string &msg)
 }
 
 // Préparer la commande PRIVMSG (séparation du canal et du message)
-bool Parsing::preparePRIVMSG(const std::string &params, std::string &channel, std::string &message)
+bool Parsing::preparePRIVMSG(const std::string& params, const std::string& suffix, std::string& target, std::string& message)
 {
-    size_t spacePos = params.find(' ');
-    if (spacePos != std::string::npos)
-    {
-        channel = params.substr(0, spacePos);
-        message = params.substr(spacePos + 1);
-        return true;
-    }
-    return false;
+	if (params.empty() || suffix.empty())
+		return false;
+	target = params;
+	// Nettoyage des espaces à droite
+	while (!target.empty() && target[target.size() - 1] == ' ')
+		target.erase(target.size() - 1);
+	message = suffix;
+	return true;
 }
-
-
 
 bool Parsing::prepareMODE(const std::string &params, std::string &channelName, std::string &mode, std::string &param)
 {

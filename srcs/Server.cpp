@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/09 13:39:01 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/09 17:33:25 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,9 +162,9 @@ void Server::handleClientMessage(int clientFd)
     else if (parsedMessage.command == "PRIVMSG")
     {
         std::string channel, message;
-        if (parsedMessage.preparePRIVMSG(parsedMessage.params, channel, message))
-        {
-            ircManager.privmsgCommand(clientFd, channel, message);
+		if (parsedMessage.preparePRIVMSG(parsedMessage.params, parsedMessage.suffix, channel, message))
+		{
+			ircManager.privmsgCommand(clientFd, channel, message);
         }
         else
         {

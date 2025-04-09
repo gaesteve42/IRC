@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:00 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/08 16:26:20 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/09 17:43:38 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,19 +18,19 @@
 class User
 {
 private:
-	std::string nickname;   // Pseudonyme de l'utilisateur affiché dans les salons IRC
-	std::string username;   // Nom réel de l'utilisateur (login système ou identifiant unique)
-	std::string hostname;   // Adresse IP ou nom d'hôte de l'utilisateur
-	bool isOperator;        // Indique si l'utilisateur a des droits spéciaux (opérateur)
-	bool _hasProvidedPassword; // Indique si le password est ok
-	bool authenticated;     // indique si le User est authentifié
-
+	int fd;
+	std::string nickname;
+	std::string username;
+	std::string hostname;
+	bool isOperator;
+	bool _hasProvidedPassword;
+	bool authenticated;
 public:
 	// Constructeurs
-	User(); // Constructeur par défaut
-	User(const std::string &nick, const std::string &user, const std::string &host); // Constructeur paramétré
+	User();
+	User(int fd);
+	User(int fd, const std::string &nick, const std::string &user, const std::string &host);
 
-	// Getters (pour accéder aux attributs privés)
 	std::string getNickname() const;
 	std::string getUsername() const;
 	std::string getHostname() const;
@@ -38,8 +38,8 @@ public:
 	bool hasProvidedPassword() const;
 	void setHasProvidedPassword(bool val);
 	bool isAuthenticated() const;
+	int getFd() const;
 
-	// Setters (pour modifier les attributs privés)
 	void setNickname(const std::string &nick);
 	void setUsername(const std::string &user);
 	void setHostname(const std::string &host);

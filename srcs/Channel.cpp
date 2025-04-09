@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:21 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/03 16:59:36 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/09 17:44:12 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,15 @@ void Channel::setUserLimit(size_t limit) { userLimit = limit; }
 bool Channel::isMember(const User *user) const
 {
 	return std::find(members.begin(), members.end(), user) != members.end();
+}
+bool Channel::isInChannel(int fd) const
+{
+	for (size_t i = 0; i < members.size(); ++i)
+	{
+		if (members[i]->getFd() == fd)
+			return true;
+	}
+	return false;
 }
 
 // Gestion des invitations

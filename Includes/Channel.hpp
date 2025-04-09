@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:15 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/03 16:40:55 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/09 17:44:36 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ public:
 	bool addMember(User *user);       // Ajoute un membre si possible
 	void removeMember(User *user);    // Retire un membre
 	bool isMember(const User *User) const; // Vérifie si un User est déjà membre du canal
-
+	bool isInChannel(int fd) const;
 	// Gestion des invitations
 	void addInvite(User* user);         // Ajoute un User à la liste des invités
 	bool isInvited(User* user) const;   // Vérifie si un User est invité
