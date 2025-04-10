@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/03 15:29:54 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/09 21:55:12 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/10 18:46:30 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,16 +69,10 @@
 
 #define RPL_TOPIC(chan, topic)            (std::string("332 ") + chan + " :" + topic + "\r\n")
 #define RPL_NOTOPIC(chan)                 (std::string("331 ") + chan + " :No topic is set\r\n")
-
-inline std::string RPL_NAMREPLY(const std::string& nick, const std::string& symbol, const std::string& channel, const std::string& names)
-{
-	return ":" + std::string(SERVER_NAME) + " 353 " + nick + " " + symbol + " " + channel + " :" + names + "\r\n";
-}
-inline std::string RPL_ENDOFNAMES(const std::string& nick, const std::string& channel)
-{
-	return ":" + std::string(SERVER_NAME) + " 366 " + nick + " " + channel + " :End of /NAMES list.\r\n";
-}
-
+#define RPL_NAMREPLY(nick, symbol, channel, names) \
+	(std::string(":") + SERVER_NAME + " 353 " + nick + " " + symbol + " " + channel + " :" + names + "\r\n")
+#define RPL_ENDOFNAMES(nick, channel) \
+	(std::string(":") + SERVER_NAME + " 366 " + nick + " " + channel + " :End of /NAMES list.\r\n")
 
 #endif
 

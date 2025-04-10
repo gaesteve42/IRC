@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/09 21:40:35 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/10 19:28:04 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,8 +113,8 @@ void Server::handleClientMessage(int clientFd)
             {
                 user->setHasProvidedPassword(true);
                 std::cout << "✅ Mot de passe accepté pour FD " << clientFd << std::endl;
-                std::string msg = ":ircserv: ✅Mot de passe accepté par le serveur\r\n";
-                send(fd, msg.c_str(), msg.length(), 0);
+                std::string msg = ":ircserv NOTICE * :Mot de passe accepté par le serveur\r\n";
+				send(clientFd, msg.c_str(), msg.length(), 0);
                 return;
             }
             else
