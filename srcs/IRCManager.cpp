@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IRCManager.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/11 16:57:21 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/11 16:59:12 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,14 +182,12 @@ void IRCManager::privmsgCommand(int senderFd, const std::string& target, const s
 			send(senderFd, err.c_str(), err.length(), 0);
 			return;
 		}
-		// Le client doit être dans le canal
 		if (!chan->isInChannel(senderFd))
 		{
 			std::string err = ERR_CANNOTSENDTOCHAN(target);
 			send(senderFd, err.c_str(), err.length(), 0);
 			return;
 		}
-		// Envoie à tous les membres sauf l’émetteur
 		const std::vector<User*>& members = chan->getMembers();
 		for (size_t i = 0; i < members.size(); ++i)
 		{
