@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/10 18:46:23 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/11 16:12:19 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -259,6 +259,17 @@ void IRCManager::modeCommand(int fd, const std::string &channelName, const std::
 		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
+	if (mode.empty())
+	{
+		std::string modes = channel->getModeString();
+		std::string params = channel->getModeParams();
+		std::string reply = ":ircserv 324 " + user->getNickname() + " " + channelName + " " + modes;
+		if (!params.empty())
+			reply += " " + params;
+		reply += "\r\n";
+		send(fd, reply.c_str(), reply.length(), 0);
+		return;
+	}
 	if (mode == "+i")
 		channel->setInviteOnly(true);
 	else if (mode == "-i")
@@ -343,7 +354,6 @@ void IRCManager::kickCommand(int fd, const std::string &channelName, const std::
 	}
 	channel->removeMember(target);
 }
-
 
 void IRCManager::inviteCommand(int fd, const std::string &channelName, const std::string &targetNick)
 {

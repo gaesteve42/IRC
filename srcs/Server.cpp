@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/10 19:28:04 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/11 16:12:29 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,16 +188,16 @@ void Server::handleClientMessage(int clientFd)
         }
     }
     else if (parsedMessage.command == "KICK")
-    {
-        std::string channel, target, reason;
-        if (parsedMessage.prepareKICK(parsedMessage.params, channel, target, reason))
-            ircManager.kickCommand(clientFd, channel, target, reason);
-        else
-        {
-            std::string err = ERR_NEEDMOREPARAMS("KICK");
-            send(clientFd, err.c_str(), err.length(), 0);
-        }
-    }
+	{
+		std::string channel, target, reason;
+		if (parsedMessage.prepareKICK(parsedMessage.params, parsedMessage.suffix, channel, target, reason))
+			ircManager.kickCommand(clientFd, channel, target, reason);
+		else
+		{
+			std::string err = ERR_NEEDMOREPARAMS("KICK");
+			send(clientFd, err.c_str(), err.length(), 0);
+		}
+	}
     else if (parsedMessage.command == "INVITE")
     {
         std::string channel, target;

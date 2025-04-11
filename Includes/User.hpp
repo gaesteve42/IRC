@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:00 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/09 17:58:20 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/11 15:21:26 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ private:
 	std::string username;   // Nom réel de l'utilisateur (login système ou identifiant unique)
 	std::string hostname;   // Adresse IP ou nom d'hôte de l'utilisateur
 	bool isOperator;        // Indique si l'utilisateur a des droits spéciaux (opérateur)
-	bool Password_is_ok; // Indique si le password est ok
+	bool Password_is_ok;    // Indique si le password est ok
 	bool authenticated;     // indique si le User est authentifié
 
 public:

@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:15 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/09 17:44:36 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/11 15:20:52 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ private:
 	bool inviteOnly;               // Accès uniquement sur invitation (mode +i)
 	bool topicRestricted;          // Seuls les opérateurs peuvent changer le sujet (mode +t)
 	size_t userLimit;              // Nombre max de membres autorisés (mode +l, 0 = illimité)
-	std::vector<User*> members;  // Liste des membres présents dans le canal
+	std::vector<User*> members;    // Liste des membres présents dans le canal
 	std::set<User*> invitedUsers;
 
 public:
@@ -39,7 +39,7 @@ public:
 	// Gestion des invitations
 	void addInvite(User* user);         // Ajoute un User à la liste des invités
 	bool isInvited(User* user) const;   // Vérifie si un User est invité
-	void removeInvite(User* user);      // Retire un User de la liste d'invités (optionnel mais utile)
+	void removeInvite(User* user);      // Retire un User de la liste d'invités
 
 	// Getters
 	std::string getChannelName() const;
@@ -49,6 +49,10 @@ public:
 	bool isTopicRestricted() const;
 	size_t getUserLimit() const;
 	const std::vector<User*> &getMembers() const;
+
+	//modeCommand
+	std::string getModeString() const;
+	std::string getModeParams() const;
 
 	// Setters
 	void setTopic(const std::string &topic);

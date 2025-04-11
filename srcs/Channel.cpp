@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:21 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/09 17:44:12 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/11 14:26:15 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,34 @@ bool Channel::isInChannel(int fd) const
 			return true;
 	}
 	return false;
+}
+
+std::string Channel::getModeString() const
+{
+	std::string modes = "+";
+	if (inviteOnly)
+		modes += "i";
+	if (topicRestricted)
+		modes += "t";
+	if (!key.empty())
+		modes += "k";
+	if (userLimit > 0)
+		modes += "l";
+	return modes;
+}
+
+std::string Channel::getModeParams() const
+{
+	std::string params;
+	if (!key.empty())
+		params += key + " ";
+	if (userLimit > 0)
+	{
+		std::ostringstream oss;
+		oss << userLimit;
+		params += oss.str();
+	}
+	return params;
 }
 
 // Gestion des invitations

@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:17:03 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/09 17:33:29 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/11 16:12:23 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,20 +128,30 @@ bool Parsing::prepareMODE(const std::string &params, std::string &channelName, s
     return false;
 }
 
-bool Parsing::prepareKICK(const std::string &params, std::string &channel, std::string &target, std::string &reason)
+bool Parsing::prepareKICK(const std::string &params, const std::string &suffix,
+	std::string &channel, std::string &target, std::string &reason)
 {
-    size_t firstSpace = params.find(' ');
-    if (firstSpace == std::string::npos) return false;
-
-    size_t secondSpace = params.find(' ', firstSpace + 1);
-    if (secondSpace == std::string::npos) return false;
-
-    channel = params.substr(0, firstSpace);
-    target = params.substr(firstSpace + 1, secondSpace - firstSpace - 1);
-    reason = params.substr(secondSpace + 1);
-
-    return true;
+	size_t firstSpace = params.find(' ');
+	if (firstSpace == std::string::npos)
+		return false;
+	channel = params.substr(0, firstSpace);
+	size_t secondSpace = params.find(' ', firstSpace + 1);
+	if (secondSpace == std::string::npos)
+		target = params.substr(firstSpace + 1);
+	else
+		target = params.substr(firstSpace + 1, secondSpace - firstSpace - 1);
+	reason = suffix;
+	while (!reason.empty() && reason[0] == ' ')
+		reason.erase(0, 1);
+	while (!reason.empty() && reason[reason.size() - 1] == ' ')
+		reason.erase(reason.size() - 1);
+	if (!reason.empty() && reason[0] == ':')
+		reason.erase(0, 1);
+	while (!reason.empty() && reason[0] == ' ')
+		reason.erase(0, 1);
+	return !channel.empty() && !target.empty();
 }
+
 
 bool Parsing::prepareINVITE(const std::string &params, std::string &channel, std::string &target)
 {
