@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/11 16:12:29 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/11 16:57:21 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,6 @@ void Server::handleClientMessage(int clientFd)
     std::string message(buffer);
     Parsing parsedMessage;
     parsedMessage.parseCommand(message);  // Découpe le message en prefix, command, params, suffix
-
     User *user = ircManager.getUser(clientFd);
 
     if (!user)
@@ -120,7 +119,7 @@ void Server::handleClientMessage(int clientFd)
             else
             {
                 std::cout << "❌ Mauvais mot de passe pour FD " << clientFd << std::endl;
-                std::string err = "ERROR :Mot de passe incorrect\r\n";
+                std::string err = "ERROR :Mot de passe incorrect, deconnexion su serveur...\r\n";
                 send(clientFd, err.c_str(), err.length(), 0);
                 removeClient(clientFd);
                 ircManager.removeUser(clientFd);
@@ -233,10 +232,18 @@ void Server::handleNewConnection()
     struct sockaddr_in clientAddr;
     socklen_t clientAddrLen = sizeof(clientAddr);
     int clientFd = accept(_serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
+    
 
     if (clientFd < 0)
     {
         std::cerr << "❌ Erreur : échec de l'acceptation de la connexion" << std::endl;
+        return;
+    }
+
+    if (fcntl(clientFd, F_SETFL, O_NONBLOCK) == -1)//rendre socket non bloquant
+    {
+        std::cerr << "Erreur lors du fcntl (F_SETFL)" << std::endl;
+        close(clientFd);
         return;
     }
 
@@ -251,6 +258,8 @@ void Server::handleNewConnection()
     // Ajouter un nouvel utilisateur dans IRCManager
     ircManager.newUser(clientFd);
 }
+
+
 
 
 

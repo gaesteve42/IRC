@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:17:03 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/11 16:12:23 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/11 16:57:21 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

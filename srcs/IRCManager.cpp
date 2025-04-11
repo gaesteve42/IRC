@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IRCManager.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/11 16:12:19 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/11 16:57:21 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -392,9 +392,20 @@ void IRCManager::inviteCommand(int fd, const std::string &channelName, const std
 		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
+	if (channel->isMember(target))
+	{
+		std::string msg = ERR_USERONCHANNEL(targetNick, channelName);
+		send(fd, msg.c_str(), msg.length(), 0);
+		return;
+	}
 	channel->addInvite(target);
+
+	//mess a celui qui invite
 	std::string msg = ":" + sender->getNickname() + " INVITE " + target->getNickname() + " :" + channelName + "\r\n";
 	send(fd, msg.c_str(), msg.length(), 0);
+	//mess a celui qui est invite
+	std::string inviteMsg = ":" + sender->getNickname() + " INVITE " + target->getNickname() + " :" + channelName + "\r\n";
+	send(target->getFd(), inviteMsg.c_str(), inviteMsg.length(), 0);
 }
 
 void IRCManager::topicCommand(int fd, const std::string &channelName, const std::string &newTopic)
