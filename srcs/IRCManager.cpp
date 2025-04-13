@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/11 16:59:12 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/13 15:09:14 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,7 +235,7 @@ void IRCManager::userCommand(int fd, const std::string &username)
 	}
 }
 
-void IRCManager::modeCommand(int fd, const std::string &channelName, const std::string &mode, const std::string &param)
+void IRCManager::modeCommand(int fd, const std::string &channelName, const std::string &modes, const std::vector<std::string> &params)
 {
 	User *user = getUser(fd);
 	if (!user || !user->isAuthenticated())
@@ -257,53 +257,69 @@ void IRCManager::modeCommand(int fd, const std::string &channelName, const std::
 		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
-	if (mode.empty())
+	if (modes.empty())
 	{
-		std::string modes = channel->getModeString();
-		std::string params = channel->getModeParams();
-		std::string reply = ":ircserv 324 " + user->getNickname() + " " + channelName + " " + modes;
-		if (!params.empty())
-			reply += " " + params;
+		std::string pm = channel->getModeParams(); // ex: "secret123 10"
+		std::string reply = ":ircserv 324 " + user->getNickname() + " " + channelName + " " + channel->getModeString();
+		if (!pm.empty())
+			reply += " " + pm;
 		reply += "\r\n";
 		send(fd, reply.c_str(), reply.length(), 0);
+
 		return;
 	}
-	if (mode == "+i")
-		channel->setInviteOnly(true);
-	else if (mode == "-i")
-		channel->setInviteOnly(false);
-	else if (mode == "+t")
-		channel->setTopicRestricted(true);
-	else if (mode == "-t")
-		channel->setTopicRestricted(false);
-	else if (mode == "+k")
-		channel->setKey(param);
-	else if (mode == "-k")
-		channel->setKey("");
-	else if (mode == "+l")
-		channel->setUserLimit(std::atoi(param.c_str()));
-	else if (mode == "-l")
-		channel->setUserLimit(0);
-	else if (mode == "+o")
+	bool add = true;
+	size_t paramIndex = 0;
+	for (size_t i = 0; i < modes.length(); ++i)
 	{
-		for (size_t i = 0; i < channel->getMembers().size(); i++)
+		char c = modes[i];
+		if (c == '+') add = true;
+		else if (c == '-') add = false;
+		else
 		{
-			User *member = channel->getMembers()[i];
-			if (member->getNickname() == param)
-				member->setOperator(true);
+			switch (c)
+			{
+				case 'i':
+					channel->setInviteOnly(add);
+					break;
+				case 't':
+					channel->setTopicRestricted(add);
+					break;
+				case 'k':
+					if (add && paramIndex < params.size())
+						channel->setKey(params[paramIndex++]);
+					else if (!add)
+						channel->setKey("");
+					break;
+				case 'l':
+					if (add && paramIndex < params.size())
+						channel->setUserLimit(std::atoi(params[paramIndex++].c_str()));
+					else if (!add)
+						channel->setUserLimit(0);
+					break;
+				case 'o':
+					if (paramIndex < params.size())
+					{
+						std::string nick = params[paramIndex++];
+						const std::vector<User*>& members = channel->getMembers();
+						for (size_t j = 0; j < members.size(); ++j)
+						{
+							if (members[j]->getNickname() == nick)
+								members[j]->setOperator(add);
+						}
+					}
+					break;
+				default:
+				{
+					std::string err = ERR_UNKNOWNMODE(std::string(1, c));
+					send(fd, err.c_str(), err.length(), 0);
+					break;
+				}
+			}
 		}
 	}
-	else if (mode == "-o")
-	{
-		for (size_t i = 0; i < channel->getMembers().size(); i++)
-		{
-			User *member = channel->getMembers()[i];
-			if (member->getNickname() == param)
-				member->setOperator(false);
-		}
-	}
-	std::string msg = ":ircserv 324 " + channelName + " " + mode + (param.empty() ? "" : " " + param) + "\r\n";
-	send(fd, msg.c_str(), msg.length(), 0);
+	std::string reply = ":ircserv 324 " + user->getNickname() + " " + channelName + " " + channel->getModeString() + "\r\n";
+	send(fd, reply.c_str(), reply.length(), 0);
 }
 
 void IRCManager::kickCommand(int fd, const std::string &channelName, const std::string &targetNick, const std::string &reason)
@@ -397,7 +413,6 @@ void IRCManager::inviteCommand(int fd, const std::string &channelName, const std
 		return;
 	}
 	channel->addInvite(target);
-
 	//mess a celui qui invite
 	std::string msg = ":" + sender->getNickname() + " INVITE " + target->getNickname() + " :" + channelName + "\r\n";
 	send(fd, msg.c_str(), msg.length(), 0);
@@ -450,7 +465,7 @@ void IRCManager::topicCommand(int fd, const std::string &channelName, const std:
 			return;
 		}
 		channel->setTopic(newTopic);
-		std::string msg = ":" + user->getNickname() + " TOPIC " + channelName + " :" + newTopic + "\r\n";
+		std::string msg = ":" + user->getNickname() + " TOPIC " + channelName + " " + newTopic + "\r\n";
 		send(fd, msg.c_str(), msg.length(), 0);
 	}
 }

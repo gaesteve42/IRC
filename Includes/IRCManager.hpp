@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:04:06 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/10 18:46:19 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/13 13:32:47 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ public:
 	void privmsgCommand(int fd, const std::string &channelName, const std::string &message);
 	void nickCommand(int fd, const std::string &nickname);
 	void userCommand(int fd, const std::string &username);
-	void modeCommand(int fd, const std::string &channelName, const std::string &mode, const std::string &param = "");
+	void modeCommand(int fd, const std::string &channelName, const std::string &modes, const std::vector<std::string> &params);
 	void kickCommand(int fd, const std::string &channelName, const std::string &targetNick, const std::string &reason);
 	void inviteCommand(int fd, const std::string &channelName, const std::string &targetNick);
 	void topicCommand(int fd, const std::string &channelName, const std::string &newTopic);

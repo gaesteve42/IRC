@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:17:03 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/11 16:57:21 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/13 15:09:24 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,28 +104,42 @@ bool Parsing::preparePRIVMSG(const std::string& params, const std::string& suffi
 	return true;
 }
 
-bool Parsing::prepareMODE(const std::string &params, std::string &channelName, std::string &mode, std::string &param)
+bool Parsing::prepareMODE(const std::string &params, const std::string &suffix,
+	std::string &channelName, std::string &modes, std::string &param)
 {
-    size_t spacePos = params.find(' ');
-    if (spacePos != std::string::npos)
-    {
-        channelName = params.substr(0, spacePos);
-        std::string modeAndParam = params.substr(spacePos + 1);
-
-        size_t modePos = modeAndParam.find(' ');
-        if (modePos != std::string::npos)
-        {
-            mode = modeAndParam.substr(0, modePos);
-            param = modeAndParam.substr(modePos + 1);
-        }
-        else
-        {
-            mode = modeAndParam;  // Pas de paramètre, donc mode seul
-            param = "";
-        }
-        return true;
-    }
-    return false;
+	// 1) On parse d’abord ce qu’on a dans params (comme avant)
+	size_t spacePos = params.find(' ');
+	if (spacePos == std::string::npos)
+		return false;
+	// channelName = "#test"
+	channelName = params.substr(0, spacePos);
+	// modeAndParam = "+il 10" (ou juste "+il", etc.)
+	std::string modeAndParam = params.substr(spacePos + 1);
+	size_t modePos = modeAndParam.find(' ');
+	if (modePos != std::string::npos)
+	{
+		// modes = "+il"
+		modes = modeAndParam.substr(0, modePos);
+		// param = "10"
+		param = modeAndParam.substr(modePos + 1);
+	}
+	else
+	{
+		// pas de param -> param = ""
+		modes = modeAndParam;
+		param = "";
+	}
+	// 2) Fallback si jamais c’est vide et qu’on a un suffix
+	// (cas ou parseSingleCommand a mis "10" dans suffix par ex)
+	// ou s’il manque un param pour +k, +l, +o
+	if (!suffix.empty())
+	{
+		// on s’assure qu’on ne double pas
+		if (!param.empty())
+		param += " ";
+		param += suffix;
+	}
+	return !channelName.empty();
 }
 
 bool Parsing::prepareKICK(const std::string &params, const std::string &suffix,
@@ -164,21 +178,20 @@ bool Parsing::prepareINVITE(const std::string &params, std::string &channel, std
     return true;
 }
 
-
 bool Parsing::prepareTOPIC(const std::string &params, std::string &channel, std::string &topic)
 {
-    size_t spacePos = params.find(' ');
-    if (spacePos == std::string::npos)
-    {
-        channel = params;
-        topic = "";  // Pas de sujet, on veut juste consulter
-    }
-    else
-    {
-        channel = params.substr(0, spacePos);
-        topic = params.substr(spacePos + 1);
-    }
-    return true;
+	size_t spacePos = params.find(' ');
+	if (spacePos == std::string::npos)
+	{
+		channel = params;
+		topic = "";  // Pas de sujet, on veut juste consulter
+	}
+	else
+	{
+		channel = params.substr(0, spacePos);
+		topic = params.substr(spacePos + 1);
+	}
+	return true;
 }
 
 

@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:16:35 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/11 16:04:04 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/13 14:32:55 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ class Parsing
 		void parseCommand(const std::string &message);
 		void parseSingleCommand(const std::string &message);
 		bool preparePRIVMSG(const std::string& params, const std::string& suffix, std::string& target, std::string& message);
-		bool prepareMODE(const std::string &params, std::string &channelName, std::string &mode, std::string &param);
+		bool prepareMODE(const std::string &params, const std::string &suffix, std::string &channelName, std::string &modes, std::string &param);
 		bool prepareKICK(const std::string &params, const std::string &suffix, std::string &channel, std::string &target, std::string &reason);
 		bool prepareINVITE(const std::string &params, std::string &channel, std::string &target);
 		bool prepareTOPIC(const std::string &params, std::string &channel, std::string &topic);
