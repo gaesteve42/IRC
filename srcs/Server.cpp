@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/13 15:09:46 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/13 15:36:04 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,13 +175,9 @@ void Server::handleClientMessage(int clientFd)
     }
     else if (parsedMessage.command == "MODE")
 	{
-		std::string channelName, modes, param;
-		std::vector<std::string> paramVec;
-		if (parsedMessage.prepareMODE(parsedMessage.params, parsedMessage.suffix,
-										channelName, modes, param))
-		{
-			ircManager.modeCommand(clientFd, channelName, modes, paramVec);
-		}
+		std::string channelName, mode, param;
+		if (parsedMessage.prepareMODE(parsedMessage.params, channelName, mode, param))
+			ircManager.modeCommand(clientFd, channelName, mode, param);
 		else
 		{
 			std::string errorMsg = ERR_NEEDMOREPARAMS(parsedMessage.command);
@@ -212,25 +208,21 @@ void Server::handleClientMessage(int clientFd)
     }
     else if (parsedMessage.command == "TOPIC")
 	{
-		// "channelName" = première partie de parsedMessage.params
-		// "newTopic" = suffix
 		std::string channelName;
 		std::istringstream iss(parsedMessage.params);
 		if (!(iss >> channelName))
 		{
-			// pas de param → RPL_NEEDMOREPARAMS
 			std::string err = ERR_NEEDMOREPARAMS("TOPIC");
 			send(clientFd, err.c_str(), err.length(), 0);
 			return;
 		}
-		// "newTopic" = parsedMessage.suffix
 		ircManager.topicCommand(clientFd, channelName, parsedMessage.suffix);
 	}
-    else
-    {
-        std::string errorMsg = ERR_UNKNOWNCOMMAND(parsedMessage.command);
-        send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
-    }
+	else
+	{
+		std::string errorMsg = ERR_UNKNOWNCOMMAND(parsedMessage.command);
+		send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
+	}
 }
 
 void Server::handleNewConnection()

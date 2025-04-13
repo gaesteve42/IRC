@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:17:03 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/13 15:09:24 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/13 15:36:01 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,8 +104,7 @@ bool Parsing::preparePRIVMSG(const std::string& params, const std::string& suffi
 	return true;
 }
 
-bool Parsing::prepareMODE(const std::string &params, const std::string &suffix,
-	std::string &channelName, std::string &modes, std::string &param)
+bool Parsing::prepareMODE(const std::string &params, std::string &channelName, std::string &modes, std::string &param)
 {
 	// 1) On parse d’abord ce qu’on a dans params (comme avant)
 	size_t spacePos = params.find(' ');
