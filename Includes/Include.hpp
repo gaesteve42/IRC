@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Include.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/03 15:29:54 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/11 14:26:11 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/13 16:23:55 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@
 #define ERR_NEEDMOREPARAMS(cmd)           (std::string("461 ") + cmd + " :Not enough parameters\r\n")
 #define ERR_NOSUCHNICK(nick)              (std::string("401 ") + nick + " :No such nick/channel\r\n")
 #define ERR_NOSUCHCHANNEL(chan)           (std::string("403 ") + chan + " :No such channel\r\n")
+#define ERR_BADCHANNAME(chan) 			  (std::string("403 ") + chan + " :Invalid channel name, must start with '#' or '&'\r\n")
 #define ERR_CANNOTSENDTOCHAN(chan)        (std::string("404 ") + chan + " :Cannot send to channel\r\n")
 #define ERR_NOTONCHANNEL(chan)            (std::string("442 ") + chan + " :You're not on that channel\r\n")
 #define ERR_USERNOTINCHANNEL(nick, chan)  (std::string("441 ") + nick + " " + chan + " :They aren't on that channel\r\n")

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:16:35 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/13 15:35:56 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/13 16:50:01 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ class Parsing
 		void parseCommand(const std::string &message);
 		void parseSingleCommand(const std::string &message);
 		bool preparePRIVMSG(const std::string& params, const std::string& suffix, std::string& target, std::string& message);
-		bool prepareMODE(const std::string &params, std::string &channelName, std::string &modes, std::string &param);
+		bool prepareMODE(const std::string &params, std::string &channelName, std::string &modeStr, std::vector<std::string> &modeParams);
 		bool prepareKICK(const std::string &params, const std::string &suffix, std::string &channel, std::string &target, std::string &reason);
 		bool prepareINVITE(const std::string &params, std::string &channel, std::string &target);
 		bool prepareTOPIC(const std::string &params, std::string &channel, std::string &topic);

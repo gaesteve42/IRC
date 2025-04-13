@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:17:03 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/13 15:36:01 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/13 17:19:42 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,42 +104,26 @@ bool Parsing::preparePRIVMSG(const std::string& params, const std::string& suffi
 	return true;
 }
 
-bool Parsing::prepareMODE(const std::string &params, std::string &channelName, std::string &modes, std::string &param)
+bool Parsing::prepareMODE(const std::string &params, std::string &channelName, std::string &modeStr, std::vector<std::string> &modeParams)
 {
-	// 1) On parse d’abord ce qu’on a dans params (comme avant)
-	size_t spacePos = params.find(' ');
-	if (spacePos == std::string::npos)
-		return false;
-	// channelName = "#test"
-	channelName = params.substr(0, spacePos);
-	// modeAndParam = "+il 10" (ou juste "+il", etc.)
-	std::string modeAndParam = params.substr(spacePos + 1);
-	size_t modePos = modeAndParam.find(' ');
-	if (modePos != std::string::npos)
-	{
-		// modes = "+il"
-		modes = modeAndParam.substr(0, modePos);
-		// param = "10"
-		param = modeAndParam.substr(modePos + 1);
-	}
-	else
-	{
-		// pas de param -> param = ""
-		modes = modeAndParam;
-		param = "";
-	}
-	// 2) Fallback si jamais c’est vide et qu’on a un suffix
-	// (cas ou parseSingleCommand a mis "10" dans suffix par ex)
-	// ou s’il manque un param pour +k, +l, +o
-	if (!suffix.empty())
-	{
-		// on s’assure qu’on ne double pas
-		if (!param.empty())
-		param += " ";
-		param += suffix;
-	}
-	return !channelName.empty();
+    std::istringstream ss(params);
+    std::string word;
+
+    // 1. Récupérer le nom du channel
+    if (!(ss >> channelName))
+        return false;
+
+    // 2. Tenter de récupérer la chaîne de modes (ex: "+klo")
+    if (!(ss >> modeStr))
+        modeStr = ""; // autoriser MODE #channel seul
+
+    // 3. Récupérer tous les paramètres restants (optionnels)
+    while (ss >> word)
+        modeParams.push_back(word);
+
+    return true;
 }
+
 
 bool Parsing::prepareKICK(const std::string &params, const std::string &suffix,
 	std::string &channel, std::string &target, std::string &reason)

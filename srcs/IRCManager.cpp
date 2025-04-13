@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IRCManager.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/13 16:13:35 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/13 17:11:50 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,23 +85,27 @@ void IRCManager::joinCommand(int fd, const std::string &input)
 	}
 	// 1) Découper en channelName + userKey
 	std::string channelName, userKey;
+	size_t spacePos = input.find(' ');
+	if (spacePos != std::string::npos)
 	{
-		size_t spacePos = input.find(' ');
-		if (spacePos != std::string::npos)
-		{
-			channelName = input.substr(0, spacePos);
-			userKey     = input.substr(spacePos + 1);
-		}
-		else
-		{
-			channelName = input; // pas de key
-		}
+		channelName = input.substr(0, spacePos);
+		userKey     = input.substr(spacePos + 1);
+	}
+	else
+	{
+		channelName = input; // pas de key
 	}
 	// 2) Créer le channel s’il n’existe pas
 	if (channels.find(channelName) == channels.end())
 	{
+		if (channelName.empty() || (channelName[0] != '#' && channelName[0] != '&'))
+		{
+			std::string msg = ERR_BADCHANNAME(channelName);
+			send(fd, msg.c_str(), msg.length(), 0);
+			return;
+		}
 		channels[channelName] = new Channel(channelName);
-		// Le premier qui joint -> opérateur (si c'est la règle de ton projet)
+		// Le premier qui joint -> opérateur 
 		user->setOperator(true);
 	}
 	Channel *channel = channels[channelName];
@@ -265,9 +269,8 @@ void IRCManager::userCommand(int fd, const std::string &username)
 	}
 }
 
-void IRCManager::modeCommand(int fd, const std::string &channelName, const std::string &modeStr, const std::string &param)
+void IRCManager::modeCommand(int fd, const std::string &channelName, const std::string &modeStr, const std::vector<std::string> &params)
 {
-	// 1) Vérifs d’usage
 	User *user = getUser(fd);
 	if (!user || !user->isAuthenticated())
 	{
@@ -288,88 +291,98 @@ void IRCManager::modeCommand(int fd, const std::string &channelName, const std::
 		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
-	// 2) Si aucun mode => renvoie juste la liste
-	if (modeStr.empty())
+
+	bool add = true;
+	size_t paramIndex = 0;
+
+	for (size_t i = 0; i < modeStr.length(); ++i)
 	{
-		// Affiche les modes actifs
-		std::string reply = ":ircserv 324 " + user->getNickname() + " " + channelName + " " + channel->getModeString() + "\r\n";
-		send(fd, reply.c_str(), reply.length(), 0);
-		return;
-	}
-	// 3) Vérifier qu’il y a EXACTEMENT un signe (+/-) et un caractère
-	// Ex: "+i", "-k", etc. => 2 caractères
-	// si param voulu => param est dans `param`.
-	// Sinon => on renvoie une erreur
-	if (modeStr.size() != 2 || (modeStr[0] != '+' && modeStr[0] != '-'))
-	{
-		// ex: "+il" => 3 caractères => on refuse
-		// ex: "foo" => 3 caractères => on refuse
-		std::string err = "ERROR :Only one mode at a time. Example: +i / -k <key> etc.\r\n";
-		send(fd, err.c_str(), err.length(), 0);
-		return;
-	}
-	// 4) Lecture du signe et du mode
-	bool add = (modeStr[0] == '+');
-	char m = modeStr[1];
-	// 5) Appliquer le mode
-	switch (m)
-	{
-		case 'i':
-			channel->setInviteOnly(add);
-			break;
-		case 't':
-			channel->setTopicRestricted(add);
-			break;
-		case 'k':
-			if (add)
-				channel->setKey(param);
-			else
-				channel->setKey("");
-			break;
-		case 'l':
-			if (add)
-				channel->setUserLimit(std::atoi(param.c_str()));
-			else
-				channel->setUserLimit(0);
-			break;
-		case 'o':
+		char m = modeStr[i];
+		if (m == '+')
 		{
-		if (!add) // On retire un op
+			add = true;
+			continue;
+		}
+		else if (m == '-')
 		{
-			// ex: /MODE #chan -o Bob
-			// retier l'op
-			const std::vector<User*>& members = channel->getMembers();
-			for (size_t i = 0; i < members.size(); ++i)
+			add = false;
+			continue;
+		}
+
+		switch (m)
+		{
+			case 'i':
+				channel->setInviteOnly(add);
+				break;
+			case 't':
+				channel->setTopicRestricted(add);
+				break;
+			case 'k':
+				if (add)
+				{
+					if (paramIndex >= params.size())
+					{
+						std::string err = "ERROR :Missing key for +k\r\n";
+						send(fd, err.c_str(), err.length(), 0);
+						return;
+					}
+					channel->setKey(params[paramIndex++]);
+				}
+				else
+				{
+					channel->setKey("");
+				}
+				break;
+			case 'l':
+				if (add)
+				{
+					if (paramIndex >= params.size())
+					{
+						std::string err = "ERROR :Missing user limit for +l\r\n";
+						send(fd, err.c_str(), err.length(), 0);
+						return;
+					}
+					channel->setUserLimit(std::atoi(params[paramIndex++].c_str()));
+				}
+				else
+				{
+					channel->setUserLimit(0);
+				}
+				break;
+			case 'o':
 			{
-				if (members[i]->getNickname() == param)
-					members[i]->setOperator(false);
+				if (paramIndex >= params.size())
+				{
+					std::string err = "ERROR :Missing nickname for +o/-o\r\n";
+					send(fd, err.c_str(), err.length(), 0);
+					return;
+				}
+				const std::string &nick = params[paramIndex++];
+				const std::vector<User*> &members = channel->getMembers();
+				for (size_t j = 0; j < members.size(); ++j)
+				{
+					if (members[j]->getNickname() == nick)
+					{
+						members[j]->setOperator(add);
+						break;
+					}
+				}
+				break;
+			}
+			default:
+			{
+				std::string err = ERR_UNKNOWNMODE(std::string(1, m));
+				send(fd, err.c_str(), err.length(), 0);
+				return;
 			}
 		}
-		else
-		{
-			// ex: /MODE #chan +o Bob
-			const std::vector<User*>& members = channel->getMembers();
-			for (size_t i = 0; i < members.size(); ++i)
-			{
-				if (members[i]->getNickname() == param)
-					members[i]->setOperator(true);
-			}
-		}
-		break;
 	}
-	default:
-	{
-		// mode inconnu
-		std::string err = ERR_UNKNOWNMODE(std::string(1, m));
-		send(fd, err.c_str(), err.length(), 0);
-		return;
-		}
-	}
-	// 6) Répondre
-	std::string reply = ":ircserv 324 " + user->getNickname() + " " + channelName +
-	" " + channel->getModeString() + "\r\n";
+
+	// Répondre à l'utilisateur
+	std::string reply = ":ircserv 324 " + user->getNickname() + " " + channelName + " " + channel->getModeString() + "\r\n";
 	send(fd, reply.c_str(), reply.length(), 0);
 }
+
 
 
 void IRCManager::kickCommand(int fd, const std::string &channelName, const std::string &targetNick, const std::string &reason)

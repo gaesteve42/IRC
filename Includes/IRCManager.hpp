@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IRCManager.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:04:06 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/13 15:28:45 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/13 16:50:01 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ public:
 	void privmsgCommand(int fd, const std::string &channelName, const std::string &message);
 	void nickCommand(int fd, const std::string &nickname);
 	void userCommand(int fd, const std::string &username);
-	void modeCommand(int fd, const std::string &channelName, const std::string &modeStr, const std::string &param);
+	void modeCommand(int fd, const std::string &channelName, const std::string &modeStr, const std::vector<std::string> &params);
 	void kickCommand(int fd, const std::string &channelName, const std::string &targetNick, const std::string &reason);
 	void inviteCommand(int fd, const std::string &channelName, const std::string &targetNick);
 	void topicCommand(int fd, const std::string &channelName, const std::string &newTopic);

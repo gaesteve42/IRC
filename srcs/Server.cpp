@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/13 15:36:04 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/13 16:50:01 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,16 +174,23 @@ void Server::handleClientMessage(int clientFd)
         }
     }
     else if (parsedMessage.command == "MODE")
-	{
-		std::string channelName, mode, param;
-		if (parsedMessage.prepareMODE(parsedMessage.params, channelName, mode, param))
-			ircManager.modeCommand(clientFd, channelName, mode, param);
-		else
-		{
-			std::string errorMsg = ERR_NEEDMOREPARAMS(parsedMessage.command);
-			send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
-		}
-	}
+    {
+        std::string channelName, modeStr;
+        std::vector<std::string> modeParams;
+
+        // Appel de prepareMODE pour extraire le channel, les modes et les paramètres
+        if (parsedMessage.prepareMODE(parsedMessage.params, channelName, modeStr, modeParams))
+        {
+            // Passe le channel, la chaîne de modes et les paramètres à modeCommand
+            ircManager.modeCommand(clientFd, channelName, modeStr, modeParams);
+        }
+        else
+        {
+            std::string errorMsg = ERR_NEEDMOREPARAMS(parsedMessage.command);
+            send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
+        }
+    }
+
 	else if (parsedMessage.command == "KICK")
 	{
 		std::string channel, target, reason;
