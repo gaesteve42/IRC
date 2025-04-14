@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/14 16:08:27 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/14 17:14:52 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,8 +227,11 @@ void Server::handleClientMessage(int clientFd)
 	}
 	else
 	{
-		std::string errorMsg = ERR_UNKNOWNCOMMAND(parsedMessage.command);
-		send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
+		if (parsedMessage.command != "WHO")
+		{
+			std::string errorMsg = ERR_UNKNOWNCOMMAND(parsedMessage.command);
+			send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
+		}
 	}
 }
 
@@ -238,29 +241,23 @@ void Server::handleNewConnection()
     struct sockaddr_in clientAddr;
     socklen_t clientAddrLen = sizeof(clientAddr);
     int clientFd = accept(_serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
-
-
     if (clientFd < 0)
     {
         std::cerr << "❌ Erreur : échec de l'acceptation de la connexion" << std::endl;
         return;
     }
-
     if (fcntl(clientFd, F_SETFL, O_NONBLOCK) == -1)//rendre socket non bloquant
     {
         std::cerr << "Erreur lors du fcntl (F_SETFL)" << std::endl;
         close(clientFd);
         return;
     }
-
     // Ajout du socket client à la liste de poll
     struct pollfd clientPollFd;
     clientPollFd.fd = clientFd;
     clientPollFd.events = POLLIN;
     _pollFds.push_back(clientPollFd);
-
     std::cout << "✅ Nouveau client connecté (FD : " << clientFd << ")" << std::endl;
-
     // Ajouter un nouvel utilisateur dans IRCManager
     ircManager.newUser(clientFd);
 }

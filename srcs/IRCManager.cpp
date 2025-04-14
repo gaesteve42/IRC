@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IRCManager.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/14 15:24:14 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/14 17:14:56 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ void IRCManager::joinCommand(int fd, const std::string &input)
 			return;
 		}
 		channels[channelName] = new Channel(channelName);
-		// Le premier qui joint -> opérateur 
+		// Le premier qui joint -> opérateur
 		user->setOperator(true);
 	}
 	Channel *channel = channels[channelName];
@@ -544,7 +544,7 @@ void IRCManager::topicCommand(int fd, const std::string &channelName, const std:
 			return;
 		}
 		channel->setTopic(newTopic);
-		std::string msg = ":" + user->getNickname() + " TOPIC " + channelName + " " + newTopic + "\r\n";
+		std::string msg = "" + user->getNickname() + " TOPIC " + channelName + " " + newTopic + "\r\n";
 		send(fd, msg.c_str(), msg.length(), 0);
 	}
 }
