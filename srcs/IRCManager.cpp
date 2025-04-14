@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/14 17:14:56 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/14 17:41:54 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -365,26 +365,40 @@ void IRCManager::modeCommand(int fd, const std::string &channelName, const std::
 					channel->setUserLimit(0);
 				}
 				break;
-			case 'o':
-			{
-				if (paramIndex >= params.size())
+				case 'o':
 				{
-					std::string err = "ERROR :Missing nickname for +o/-o\r\n";
-					send(fd, err.c_str(), err.length(), 0);
-					return;
-				}
-				const std::string &nick = params[paramIndex++];
-				const std::vector<User*> &members = channel->getMembers();
-				for (size_t j = 0; j < members.size(); ++j)
-				{
-					if (members[j]->getNickname() == nick)
+					if (paramIndex >= params.size())
 					{
-						members[j]->setOperator(add);
-						break;
+						std::string err = "ERROR :Missing nickname for +o/-o\r\n";
+						send(fd, err.c_str(), err.length(), 0);
+						return;
 					}
+					const std::string &nick = params[paramIndex++];
+					const std::vector<User*> &members = channel->getMembers();
+					for (size_t j = 0; j < members.size(); ++j)
+					{
+						if (members[j]->getNickname() == nick)
+						{
+							members[j]->setOperator(add);
+							// ICI on envoie un message de notification
+							if (add)
+							{
+								std::string notice = ":ircserv NOTICE #channel :" + nick + " est maintenant opérateur\r\n";
+								for (size_t k = 0; k < members.size(); ++k)
+									send(members[k]->getFd(), notice.c_str(), notice.size(), 0);
+							}
+							else
+							{
+								std::string notice = ":ircserv NOTICE #channel :" + nick + " a perdu ses droits d'op\r\n";
+								for (size_t k = 0; k < members.size(); ++k)
+									send(members[k]->getFd(), notice.c_str(), notice.size(), 0);
+							}
+
+							break;
+						}
+					}
+					break;
 				}
-				break;
-			}
 			default:
 			{
 				std::string err = ERR_UNKNOWNMODE(std::string(1, m));
