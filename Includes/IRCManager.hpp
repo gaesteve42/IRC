@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IRCManager.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:04:06 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/13 16:50:01 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/14 18:01:07 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ public:
 	Channel* getChannel(const std::string& name);
 
 	void joinCommand(int fd, const std::string &channelName);
-	void partCommand(int fd, const std::string &channelName);
+	void partCommand(int fd, const std::string &channelName, const std::string &reason = "");;
 	void privmsgCommand(int fd, const std::string &channelName, const std::string &message);
 	void nickCommand(int fd, const std::string &nickname);
 	void userCommand(int fd, const std::string &username);

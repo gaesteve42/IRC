@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/14 17:41:54 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/14 18:02:46 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,41 +158,33 @@ void IRCManager::joinCommand(int fd, const std::string &input)
 	}
 }
 
-void IRCManager::partCommand(int fd, const std::string &channelName)
+void IRCManager::partCommand(int fd, const std::string &channelName, const std::string &reason)
 {
-	User* user = getUser(fd);
+	User *user = getUser(fd);
 	if (!user || !user->isAuthenticated())
-	{
-		std::string msg = ERR_NOTREGISTERED();
-		send(fd, msg.c_str(), msg.length(), 0);
 		return;
-	}
 	std::map<std::string, Channel*>::iterator it = channels.find(channelName);
 	if (it == channels.end())
-	{
-		std::string msg = ERR_NOSUCHCHANNEL(channelName);
-		send(fd, msg.c_str(), msg.length(), 0);
 		return;
-	}
 	Channel* channel = it->second;
 	if (!channel->isMember(user))
-	{
-		std::string msg = ERR_NOTONCHANNEL(channelName);
-		send(fd, msg.c_str(), msg.length(), 0);
 		return;
-	}
-	// Envoyer le message PART à tous les membres du canal
+	// construire le message PART
 	std::string prefix = ":" + user->getNickname() + "!" + user->getUsername() + "@localhost";
-	std::string partMsg = prefix + " PART " + channelName + "\r\n";
+	std::string partMsg = prefix + " PART " + channelName;
 
+	if (!reason.empty())
+		partMsg += " :" + reason;  // On ajoute le reason s’il existe
+	partMsg += "\r\n";
+	// broadcast le message PART
 	const std::vector<User*>& members = channel->getMembers();
 	for (size_t i = 0; i < members.size(); ++i)
 	{
 		send(members[i]->getFd(), partMsg.c_str(), partMsg.length(), 0);
 	}
-	// Retirer le membre du canal
+	// retire user
 	channel->removeMember(user);
-	// Si le canal est vide → suppression
+	// s’il est vide -> suppr
 	if (channel->getMembers().empty())
 	{
 		delete channel;

@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/14 17:14:52 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/14 18:01:16 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,8 +158,15 @@ void Server::handleClientMessage(int clientFd)
     }
     else if (parsedMessage.command == "PART")
     {
-        ircManager.partCommand(clientFd, parsedMessage.params);
-    }
+		std::string channelName;
+		{
+			std::istringstream iss(parsedMessage.params);
+			iss >> channelName; // récupère le #channel
+			// si tu as besoin du reason
+			std::string reason = parsedMessage.suffix;
+			ircManager.partCommand(clientFd, channelName, reason);
+		}
+	}
     else if (parsedMessage.command == "PRIVMSG")
     {
         std::string channel, message;
@@ -310,7 +317,6 @@ void Server::run()
 void Server::removeClient(int clientFd)
 {
     close(clientFd);
-
     // Supprimer le client de _pollFds
     for (size_t i = 0; i < _pollFds.size(); i++)
     {
@@ -320,7 +326,6 @@ void Server::removeClient(int clientFd)
             break;
         }
     }
-
     // Faire quitter tous les canaux à l'utilisateur
     User *user = ircManager.getUser(clientFd);
     if (user)
@@ -331,12 +336,11 @@ void Server::removeClient(int clientFd)
         {
             Channel* channel = it->second;
             if (channel->isMember(user))
-            {
-                ircManager.partCommand(clientFd, it->first);
-            }
+			{
+				ircManager.partCommand(clientFd, it->first, "");
+			}
         }
     }
-
     // Supprimer l'utilisateur de IRCManager
     ircManager.removeUser(clientFd);
 }
