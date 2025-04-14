@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/13 16:50:01 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/14 16:08:27 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,10 +94,10 @@ void Server::handleClientMessage(int clientFd)
         ircManager.removeUser(clientFd);
         return;
     }
-
     std::string message(buffer);
     Parsing parsedMessage;
     parsedMessage.parseCommand(message);  // Découpe le message en prefix, command, params, suffix
+    std::cout << ">> " << parsedMessage.command << std::endl;
     User *user = ircManager.getUser(clientFd);
 
     if (!user)

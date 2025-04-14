@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/03 15:29:54 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/13 16:23:55 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/14 15:17:23 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,10 @@
 // Format standard                        ":server_name CODE nickname :message\r\n"
 
 #define SERVER_NAME "ircserv"
+
+//couleur
+#define IRC_COLOR "\x03"
+#define IRC_RESET "\x0F"
 
 // ========================== 🔴 ERREURS ==========================
 

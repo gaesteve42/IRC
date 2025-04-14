@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/13 17:11:50 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/14 15:24:14 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void IRCManager::newUser(int fd)
 {
 	User *user = new User(fd);
 	users[fd] = user;
-	std::string msg = ":ircserv NOTICE * :Bienvenue sur le serveur IRC_42 !\r\n";
+	std::string msg = IRC_COLOR "03Bienvenue sur le serveur IRC_42 !" IRC_RESET "\r\n";
 	send(fd, msg.c_str(), msg.length(), 0);
 }
 
@@ -246,15 +246,31 @@ void IRCManager::privmsgCommand(int senderFd, const std::string& target, const s
 void IRCManager::nickCommand(int fd, const std::string &nickname)
 {
 	User *user = getUser(fd);
-	if (user)
+	if (!user)
+		return;
+
+	// Vérification : le nickname est-il déjà utilisé par un autre utilisateur ?
+	for (std::map<int, User*>::iterator it = users.begin(); it != users.end(); ++it)
 	{
-		user->setNickname(nickname);
-		std::string msg = ":ircserv 001 " + nickname + " :Nickname défini\r\n";
-		send(fd, msg.c_str(), msg.length(), 0);
-		if (!user->getUsername().empty())
-			user->setAuthenticated(true);
+		User *otherUser = it->second;
+		if (otherUser->getNickname() == nickname && otherUser != user)
+		{
+			// Nickname déjà pris
+			std::string err = ERR_NICKNAMEINUSE(nickname);
+			send(fd, err.c_str(), err.length(), 0);
+			return;
+		}
 	}
+
+	user->setNickname(nickname);
+
+	std::string msg = ":ircserv 001 " + nickname + " :Nickname défini\r\n";
+	send(fd, msg.c_str(), msg.length(), 0);
+
+	if (!user->getUsername().empty())
+		user->setAuthenticated(true);
 }
+
 
 void IRCManager::userCommand(int fd, const std::string &username)
 {

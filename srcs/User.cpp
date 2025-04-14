@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:28:53 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/09 20:37:57 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/14 16:44:12 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
