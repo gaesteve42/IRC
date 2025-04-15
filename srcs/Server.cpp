@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/14 18:01:16 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/15 19:14:55 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,11 @@ void Server::handleClientMessage(int clientFd)
     std::string message(buffer);
     Parsing parsedMessage;
     parsedMessage.parseCommand(message);  // Découpe le message en prefix, command, params, suffix
-    std::cout << ">> " << parsedMessage.command << std::endl;
+    std::cout << ">> Client Fd " << clientFd << std::endl;
+    std::cout << ">> Prefix : " << parsedMessage.prefix << std::endl;
+    std::cout << ">> Commande : " << parsedMessage.command << std::endl;
+    std::cout << ">> Parametres : " << parsedMessage.params << std::endl;
+    std::cout << ">> Suffix : " << parsedMessage.suffix << std::endl << std::endl;
     User *user = ircManager.getUser(clientFd);
 
     if (!user)
@@ -136,7 +140,7 @@ void Server::handleClientMessage(int clientFd)
 
     // Vérification des commandes avec un paramètre
     if ((parsedMessage.command == "NICK" || parsedMessage.command == "USER" || parsedMessage.command == "JOIN" ||
-         parsedMessage.command == "PART") && parsedMessage.params.empty())
+         parsedMessage.command == "PART")  && parsedMessage.params.empty())
     {
         std::string errorMsg = ERR_NEEDMOREPARAMS(parsedMessage.command);
         send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
@@ -155,6 +159,10 @@ void Server::handleClientMessage(int clientFd)
     else if (parsedMessage.command == "JOIN")
     {
         ircManager.joinCommand(clientFd, parsedMessage.params);
+    }
+    else if (parsedMessage.command == "WHO")
+    {
+        ircManager.whoCommand(clientFd, parsedMessage.params);
     }
     else if (parsedMessage.command == "PART")
     {

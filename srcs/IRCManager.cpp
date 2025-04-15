@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IRCManager.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/14 18:02:46 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/15 19:48:06 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -554,3 +554,62 @@ void IRCManager::topicCommand(int fd, const std::string &channelName, const std:
 		send(fd, msg.c_str(), msg.length(), 0);
 	}
 }
+
+void IRCManager::whoCommand(int fd, const std::string &channelName)
+{
+	User* user = getUser(fd);
+	if (!user || !user->isAuthenticated())
+		return;
+
+	Channel* channel = NULL;
+	if (channels.find(channelName) != channels.end())
+		channel = channels[channelName];
+
+	if (!channel)
+	{
+		std::string err = ERR_NOSUCHCHANNEL(channelName);
+		send(fd, err.c_str(), err.length(), 0);
+		return;
+	}
+
+	const std::vector<User*>& members = channel->getMembers();
+
+	for (size_t i = 0; i < members.size(); ++i)
+	{
+		User* member = members[i];
+
+		std::string flags = "H";
+		if (member->getIsOperator())
+			flags += "@";
+
+		std::string reply = ":ircserv 352 " + user->getNickname() + " " + channelName + " ";
+		reply += member->getUsername() + " localhost ircserv " + member->getNickname() + " ";
+		reply += flags + " :0 " + member->getNickname() + "\r\n";
+
+		send(fd, reply.c_str(), reply.length(), 0);
+	}
+
+	std::string endReply = ":ircserv 315 " + user->getNickname() + " " + channelName + " :End of WHO list\r\n";
+	send(fd, endReply.c_str(), endReply.length(), 0);
+
+	// → on envoie aussi RPL_NAMREPLY ici !
+	std::string names;
+	for (size_t i = 0; i < members.size(); ++i)
+	{
+		if (members[i]->getIsOperator())
+			names += "@";
+		names += members[i]->getNickname();
+		if (i + 1 < members.size())
+			names += " ";
+	}
+	std::string nameRe = RPL_NAMREPLY(user->getNickname(), "=", channelName, names);
+	std::string endRe = RPL_ENDOFNAMES(user->getNickname(), channelName);
+
+	send(fd, nameRe.c_str(), nameRe.length(), 0);
+	send(fd, endRe.c_str(), endRe.length(), 0);
+
+}
+
+
+
+
