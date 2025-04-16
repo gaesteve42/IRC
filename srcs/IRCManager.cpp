@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/15 19:48:06 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/16 16:28:00 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,28 @@ Channel* IRCManager::getChannel(const std::string& name)
 std::map<std::string, Channel*> &IRCManager::getChannels()
 {
 	return channels;
+}
+
+void IRCManager::sendNamesReply(Channel* channel)
+{
+	const std::vector<User*>& members = channel->getMembers();
+	for (size_t i = 0; i < members.size(); ++i)
+	{
+		std::string names;
+		for (size_t j = 0; j < members.size(); ++j)
+		{
+			if (members[j]->getIsOperator())
+				names += "@";
+			names += members[j]->getNickname();
+			if (j + 1 < members.size())
+				names += " ";
+		}
+		std::string nameReply = RPL_NAMREPLY(members[i]->getNickname(), "=", channel->getChannelName(), names);
+		std::string endReply  = RPL_ENDOFNAMES(members[i]->getNickname(), channel->getChannelName());
+
+		send(members[i]->getFd(), nameReply.c_str(), nameReply.length(), 0);
+		send(members[i]->getFd(), endReply.c_str(), endReply.length(), 0);
+	}
 }
 
 void IRCManager::joinCommand(int fd, const std::string &input)
@@ -156,6 +178,7 @@ void IRCManager::joinCommand(int fd, const std::string &input)
 		std::string msg = ERR_CHANNELISFULL(channelName);
 		send(fd, msg.c_str(), msg.length(), 0);
 	}
+	sendNamesReply(channel);
 }
 
 void IRCManager::partCommand(int fd, const std::string &channelName, const std::string &reason)
@@ -385,6 +408,7 @@ void IRCManager::modeCommand(int fd, const std::string &channelName, const std::
 								for (size_t k = 0; k < members.size(); ++k)
 									send(members[k]->getFd(), notice.c_str(), notice.size(), 0);
 							}
+							sendNamesReply(channel);
 
 							break;
 						}
@@ -555,60 +579,6 @@ void IRCManager::topicCommand(int fd, const std::string &channelName, const std:
 	}
 }
 
-void IRCManager::whoCommand(int fd, const std::string &channelName)
-{
-	User* user = getUser(fd);
-	if (!user || !user->isAuthenticated())
-		return;
-
-	Channel* channel = NULL;
-	if (channels.find(channelName) != channels.end())
-		channel = channels[channelName];
-
-	if (!channel)
-	{
-		std::string err = ERR_NOSUCHCHANNEL(channelName);
-		send(fd, err.c_str(), err.length(), 0);
-		return;
-	}
-
-	const std::vector<User*>& members = channel->getMembers();
-
-	for (size_t i = 0; i < members.size(); ++i)
-	{
-		User* member = members[i];
-
-		std::string flags = "H";
-		if (member->getIsOperator())
-			flags += "@";
-
-		std::string reply = ":ircserv 352 " + user->getNickname() + " " + channelName + " ";
-		reply += member->getUsername() + " localhost ircserv " + member->getNickname() + " ";
-		reply += flags + " :0 " + member->getNickname() + "\r\n";
-
-		send(fd, reply.c_str(), reply.length(), 0);
-	}
-
-	std::string endReply = ":ircserv 315 " + user->getNickname() + " " + channelName + " :End of WHO list\r\n";
-	send(fd, endReply.c_str(), endReply.length(), 0);
-
-	// → on envoie aussi RPL_NAMREPLY ici !
-	std::string names;
-	for (size_t i = 0; i < members.size(); ++i)
-	{
-		if (members[i]->getIsOperator())
-			names += "@";
-		names += members[i]->getNickname();
-		if (i + 1 < members.size())
-			names += " ";
-	}
-	std::string nameRe = RPL_NAMREPLY(user->getNickname(), "=", channelName, names);
-	std::string endRe = RPL_ENDOFNAMES(user->getNickname(), channelName);
-
-	send(fd, nameRe.c_str(), nameRe.length(), 0);
-	send(fd, endRe.c_str(), endRe.length(), 0);
-
-}
 
 
 

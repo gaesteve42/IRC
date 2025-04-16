@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/15 19:14:55 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/16 16:49:55 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,10 +160,10 @@ void Server::handleClientMessage(int clientFd)
     {
         ircManager.joinCommand(clientFd, parsedMessage.params);
     }
-    else if (parsedMessage.command == "WHO")
+    /*else if (parsedMessage.command == "WHO")
     {
         ircManager.whoCommand(clientFd, parsedMessage.params);
-    }
+    }*/
     else if (parsedMessage.command == "PART")
     {
 		std::string channelName;
@@ -254,6 +254,7 @@ void Server::handleNewConnection()
 {
     // Accepter la nouvelle connexion
     struct sockaddr_in clientAddr;
+    memset(&clientAddr, 0, sizeof(clientAddr));
     socklen_t clientAddrLen = sizeof(clientAddr);
     int clientFd = accept(_serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
     if (clientFd < 0)
@@ -271,6 +272,7 @@ void Server::handleNewConnection()
     struct pollfd clientPollFd;
     clientPollFd.fd = clientFd;
     clientPollFd.events = POLLIN;
+    clientPollFd.revents = 0;
     _pollFds.push_back(clientPollFd);
     std::cout << "✅ Nouveau client connecté (FD : " << clientFd << ")" << std::endl;
     // Ajouter un nouvel utilisateur dans IRCManager
@@ -339,16 +341,22 @@ void Server::removeClient(int clientFd)
     if (user)
     {
         std::map<std::string, Channel*>& channels = ircManager.getChannels();
-        std::map<std::string, Channel*>::iterator it;
-        for (it = channels.begin(); it != channels.end(); ++it)
+        std::vector<std::string> joinedChannels;
+    
+        // On copie (sinon leaks puisque part efface le channel) les noms des channels où est le user
+        for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); ++it)
         {
-            Channel* channel = it->second;
-            if (channel->isMember(user))
-			{
-				ircManager.partCommand(clientFd, it->first, "");
-			}
+            if (it->second->isMember(user))
+                joinedChannels.push_back(it->first);
+        }
+    
+        // Ensuite on appelle partCommand sans toucher aux itérateurs de la map
+        for (size_t i = 0; i < joinedChannels.size(); ++i)
+        {
+            ircManager.partCommand(clientFd, joinedChannels[i], "");
         }
     }
+    
     // Supprimer l'utilisateur de IRCManager
     ircManager.removeUser(clientFd);
 }

@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:04:06 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/15 19:01:25 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/16 16:28:00 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ public:
 	User* getUserByNick(const std::string& nickname);
 	Channel* getChannel(const std::string& name);
 
+	void sendNamesReply(Channel* channel);
 	void joinCommand(int fd, const std::string &channelName);
 	void partCommand(int fd, const std::string &channelName, const std::string &reason = "");;
 	void privmsgCommand(int fd, const std::string &channelName, const std::string &message);
@@ -41,7 +42,6 @@ public:
 	void kickCommand(int fd, const std::string &channelName, const std::string &targetNick, const std::string &reason);
 	void inviteCommand(int fd, const std::string &channelName, const std::string &targetNick);
 	void topicCommand(int fd, const std::string &channelName, const std::string &newTopic);
-	void whoCommand(int fd, const std::string &channelName);
 };
 
 #endif
