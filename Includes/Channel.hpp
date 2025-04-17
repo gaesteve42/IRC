@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:15 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/11 15:20:52 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/17 15:40:23 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ private:
 	size_t userLimit;              // Nombre max de membres autorisés (mode +l, 0 = illimité)
 	std::vector<User*> members;    // Liste des membres présents dans le canal
 	std::set<User*> invitedUsers;
-
+	std::set<User*> operators;
 public:
 	// Constructeur
 	Channel(const std::string &name);
@@ -40,7 +40,10 @@ public:
 	void addInvite(User* user);         // Ajoute un User à la liste des invités
 	bool isInvited(User* user) const;   // Vérifie si un User est invité
 	void removeInvite(User* user);      // Retire un User de la liste d'invités
-
+	//Gestion des opérateurs
+	bool isOperator(User* user) const;
+	void addOperator(User* user);
+	void removeOperator(User* user);
 	// Getters
 	std::string getChannelName() const;
 	std::string getTopic() const;

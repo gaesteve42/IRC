@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:28:56 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/09 21:03:07 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/17 15:48:00 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,13 +47,12 @@ int main(int argc, char **argv)
 	{
 		Server ircServer(port, password);
 		while (running)
-			ircServer.run(); // Lance la boucle principale
+			ircServer.run();
 	}
 	catch (const std::exception &e)
 	{
 		std::cerr << "Erreur : " << e.what() << std::endl;
 		return 1;
 	}
-	//ici on fermera proprement le serveur
 	return 0;
 }

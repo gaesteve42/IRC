@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IRCManager.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/16 16:28:00 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/17 22:12:47 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ void IRCManager::sendNamesReply(Channel* channel)
 		std::string names;
 		for (size_t j = 0; j < members.size(); ++j)
 		{
-			if (members[j]->getIsOperator())
+			if (channel->isOperator(members[j]))
 				names += "@";
 			names += members[j]->getNickname();
 			if (j + 1 < members.size())
@@ -95,7 +95,6 @@ void IRCManager::sendNamesReply(Channel* channel)
 
 void IRCManager::joinCommand(int fd, const std::string &input)
 {
-	// Ex : input = "#channel" ou "#channel secretKey"
 	User *user = getUser(fd);
 	if (!user)
 		return;
@@ -105,7 +104,7 @@ void IRCManager::joinCommand(int fd, const std::string &input)
 		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
-	// 1) Découper en channelName + userKey
+	// 1️⃣ Découper en channelName + userKey
 	std::string channelName, userKey;
 	size_t spacePos = input.find(' ');
 	if (spacePos != std::string::npos)
@@ -114,70 +113,80 @@ void IRCManager::joinCommand(int fd, const std::string &input)
 		userKey     = input.substr(spacePos + 1);
 	}
 	else
+		channelName = input;
+	if (channelName.empty() || (channelName[0] != '#' && channelName[0] != '&'))
 	{
-		channelName = input; // pas de key
-	}
-	// 2) Créer le channel s’il n’existe pas
-	if (channels.find(channelName) == channels.end())
-	{
-		if (channelName.empty() || (channelName[0] != '#' && channelName[0] != '&'))
-		{
-			std::string msg = ERR_BADCHANNAME(channelName);
-			send(fd, msg.c_str(), msg.length(), 0);
-			return;
-		}
-		channels[channelName] = new Channel(channelName);
-		// Le premier qui joint -> opérateur
-		user->setOperator(true);
-	}
-	Channel *channel = channels[channelName];
-	// 3) Vérifier le mode +i (inviteOnly)
-	if (channel->isInviteOnly() && !channel->isInvited(user))
-	{
-		std::string msg = ERR_INVITEONLYCHAN(channelName);
+		std::string msg = ERR_BADCHANNAME(channelName);
 		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
-	// 4) Vérifier le mode +k (clé)
-	//    Si channel->getKey() n’est pas vide, on compare avec userKey
-	if (!channel->getKey().empty())
+	Channel *channel;
+	// 2️⃣ Créer le channel s’il n’existe pas
+	if (channels.find(channelName) == channels.end())
 	{
-		if (userKey != channel->getKey())
+		channel = new Channel(channelName);
+		channels[channelName] = channel;
+
+		channel->addMember(user);
+		channel->addOperator(user);
+	}
+	else
+	{
+		channel = channels[channelName];
+
+		// 3️⃣ Vérifier le mode +i (inviteOnly)
+		if (channel->isInviteOnly() && !channel->isInvited(user))
 		{
-			// Mauvaise clé => impossible de joindre
+			std::string msg = ERR_INVITEONLYCHAN(channelName);
+			send(fd, msg.c_str(), msg.length(), 0);
+			return;
+		}
+
+		// 4️⃣ Vérifier le mode +k (clé)
+		if (!channel->getKey().empty() && channel->getKey() != userKey)
+		{
 			std::string msg = ERR_BADCHANNELKEY(channelName);
 			send(fd, msg.c_str(), msg.length(), 0);
 			return;
 		}
-	}
-	// 5) Essayer d’ajouter l’utilisateur
-	if (channel->addMember(user))
-	{
-		channel->removeInvite(user);
-		// ------------------ Message JOIN visible par tous
-		std::string joinMsg = ":" + user->getNickname() + "!" + user->getUsername()
-								+ "@localhost JOIN :" + channelName + "\r\n";
-		const std::vector<User*>& members = channel->getMembers();
-		for (size_t i = 0; i < members.size(); ++i)
-			send(members[i]->getFd(), joinMsg.c_str(), joinMsg.length(), 0);
-		// ------------------ List des pseudos
-		std::string names;
-		for (size_t i = 0; i < members.size(); ++i)
+		// 5️⃣ Vérifier la limite +l
+		if (channel->getUserLimit() > 0 && channel->getMembers().size() >= channel->getUserLimit())
 		{
-			names += members[i]->getNickname();
-			if (i + 1 < members.size())
-				names += " ";
+			std::string msg = ERR_CHANNELISFULL(channelName);
+			send(fd, msg.c_str(), msg.length(), 0);
+			return;
 		}
-		std::string nameReply = RPL_NAMREPLY(user->getNickname(), "=", channelName, names);
-		std::string endReply  = RPL_ENDOFNAMES(user->getNickname(), channelName);
-		send(fd, nameReply.c_str(), nameReply.length(), 0);
-		send(fd, endReply.c_str(), endReply.length(), 0);
+		if (!channel->addMember(user))
+		{
+			std::string msg = ERR_CHANNELISFULL(channelName);
+			send(fd, msg.c_str(), msg.length(), 0);
+			return;
+		}
 	}
-	else
+	// ➡️ À partir d'ici, l'utilisateur est membre confirmé du channel
+	channel->removeInvite(user);
+	// 6️⃣ Envoyer un message JOIN visible par tous les membres du canal
+	std::string joinMsg = ":" + user->getNickname() + "!" + user->getUsername()
+						+ "@localhost JOIN :" + channelName + "\r\n";
+
+	const std::vector<User*>& members = channel->getMembers();
+	for (size_t i = 0; i < members.size(); ++i)
+		send(members[i]->getFd(), joinMsg.c_str(), joinMsg.length(), 0);
+	// 7️⃣ Envoyer la liste des pseudos (RPL_NAMREPLY et RPL_ENDOFNAMES)
+	std::string names;
+	for (size_t i = 0; i < members.size(); ++i)
 	{
-		std::string msg = ERR_CHANNELISFULL(channelName);
-		send(fd, msg.c_str(), msg.length(), 0);
+		if (channel->isOperator(members[i]))
+			names += "@";
+		names += members[i]->getNickname();
+		if (i + 1 < members.size())
+			names += " ";
 	}
+	std::string nameReply = RPL_NAMREPLY(user->getNickname(), "=", channelName, names);
+	std::string endReply  = RPL_ENDOFNAMES(user->getNickname(), channelName);
+	send(fd, nameReply.c_str(), nameReply.length(), 0);
+	send(fd, endReply.c_str(), endReply.length(), 0);
+	// 8️⃣ Appel optionnel selon ton implémentation :
 	sendNamesReply(channel);
 }
 
@@ -316,7 +325,7 @@ void IRCManager::modeCommand(int fd, const std::string &channelName, const std::
 		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
-	if (!channel->isMember(user) || !user->getIsOperator())
+	if (!channel->isMember(user) || !channel->isOperator(user))
 	{
 		std::string msg = ERR_CHANOPRIVSNEEDED(channelName);
 		send(fd, msg.c_str(), msg.length(), 0);
@@ -394,7 +403,10 @@ void IRCManager::modeCommand(int fd, const std::string &channelName, const std::
 					{
 						if (members[j]->getNickname() == nick)
 						{
-							members[j]->setOperator(add);
+							if (add)
+								channel->addOperator(members[j]);
+							else
+								channel->removeOperator(members[j]);
 							// ICI on envoie un message de notification
 							if (add)
 							{
@@ -423,13 +435,10 @@ void IRCManager::modeCommand(int fd, const std::string &channelName, const std::
 			}
 		}
 	}
-
 	// Répondre à l'utilisateur
 	std::string reply = ":ircserv 324 " + user->getNickname() + " " + channelName + " " + channel->getModeString() + "\r\n";
 	send(fd, reply.c_str(), reply.length(), 0);
 }
-
-
 
 void IRCManager::kickCommand(int fd, const std::string &channelName, const std::string &targetNick, const std::string &reason)
 {
@@ -447,7 +456,7 @@ void IRCManager::kickCommand(int fd, const std::string &channelName, const std::
 		return;
 	}
 	Channel *channel = channels[channelName];
-	if (!channel->isMember(sender) || !sender->getIsOperator())
+	if (!channel->isMember(sender) || !channel->isOperator(sender))
 	{
 		std::string msg = ERR_CHANOPRIVSNEEDED(channelName);
 		send(fd, msg.c_str(), msg.length(), 0);
@@ -494,7 +503,7 @@ void IRCManager::inviteCommand(int fd, const std::string &channelName, const std
 		return;
 	}
 	Channel *channel = channels[channelName];
-	if (!channel->isMember(sender) || !sender->getIsOperator())
+	if (!channel->isMember(sender) || !channel->isOperator(sender))
 	{
 		std::string msg = ERR_CHANOPRIVSNEEDED(channelName);
 		send(fd, msg.c_str(), msg.length(), 0);
@@ -567,7 +576,7 @@ void IRCManager::topicCommand(int fd, const std::string &channelName, const std:
 	}
 	else
 	{
-		if (channel->isTopicRestricted() && !user->getIsOperator())
+		if (channel->isTopicRestricted() && !channel->isOperator(user))
 		{
 			std::string msg = ERR_CHANOPRIVSNEEDED(channelName);
 			send(fd, msg.c_str(), msg.length(), 0);

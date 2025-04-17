@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:17:03 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/13 17:19:42 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/17 22:16:03 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,23 +16,22 @@ Parsing::Parsing() {}
 
 Parsing::~Parsing() {}
 
-
 void Parsing::parseCommand(const std::string &message)
 {
-    // Créer un flux à partir du message pour découper en plusieurs commandes
-    std::istringstream stream(message);
-    std::string line;
+	// Créer un flux à partir du message pour découper en plusieurs commandes
+	std::istringstream stream(message);
+	std::string line;
 
-    // Découper le message en plusieurs commandes séparées par "\r\n" ou "\n"
-    while (std::getline(stream, line, '\n')) // getline retire le \n
-    {
-        // Nettoyer les caractères de fin de ligne '\r' ou '\n' (ceux qui peuvent rester en fin de ligne)
-        if (!line.empty() && line[line.size() - 1] == '\r')
-            line.erase(line.size() - 1);  // Retirer le '\r' si présent
+	// Découper le message en plusieurs commandes séparées par "\r\n" ou "\n"
+	while (std::getline(stream, line, '\n')) // getline retire le \n
+	{
+		// Nettoyer les caractères de fin de ligne '\r' ou '\n' (ceux qui peuvent rester en fin de ligne)
+		if (!line.empty() && line[line.size() - 1] == '\r')
+			line.erase(line.size() - 1);  // Retirer le '\r' si présent
 
-        // Traiter chaque ligne (commande) après nettoyage
-        parseSingleCommand(line);
-    }
+		// Traiter chaque ligne (commande) après nettoyage
+		parseSingleCommand(line);
+	}
 }
 
 void Parsing::parseSingleCommand(const std::string &msg)
@@ -106,24 +105,19 @@ bool Parsing::preparePRIVMSG(const std::string& params, const std::string& suffi
 
 bool Parsing::prepareMODE(const std::string &params, std::string &channelName, std::string &modeStr, std::vector<std::string> &modeParams)
 {
-    std::istringstream ss(params);
-    std::string word;
-
-    // 1. Récupérer le nom du channel
-    if (!(ss >> channelName))
-        return false;
-
-    // 2. Tenter de récupérer la chaîne de modes (ex: "+klo")
-    if (!(ss >> modeStr))
-        modeStr = ""; // autoriser MODE #channel seul
-
-    // 3. Récupérer tous les paramètres restants (optionnels)
-    while (ss >> word)
-        modeParams.push_back(word);
-
-    return true;
+	std::istringstream ss(params);
+	std::string word;
+	// 1. Récupérer le nom du channel
+	if (!(ss >> channelName))
+		return false;
+	// 2. Tenter de récupérer la chaîne de modes (ex: "+klo")
+	if (!(ss >> modeStr))
+		modeStr = ""; // autoriser MODE #channel seul
+	// 3. Récupérer tous les paramètres restants (optionnels)
+	while (ss >> word)
+		modeParams.push_back(word);
+	return true;
 }
-
 
 bool Parsing::prepareKICK(const std::string &params, const std::string &suffix,
 	std::string &channel, std::string &target, std::string &reason)
@@ -149,16 +143,13 @@ bool Parsing::prepareKICK(const std::string &params, const std::string &suffix,
 	return !channel.empty() && !target.empty();
 }
 
-
 bool Parsing::prepareINVITE(const std::string &params, std::string &channel, std::string &target)
 {
-    size_t spacePos = params.find(' ');
-    if (spacePos == std::string::npos) return false;
-
-    target = params.substr(0, spacePos);
-    channel = params.substr(spacePos + 1);
-
-    return true;
+	size_t spacePos = params.find(' ');
+	if (spacePos == std::string::npos) return false;
+	target = params.substr(0, spacePos);
+	channel = params.substr(spacePos + 1);
+	return true;
 }
 
 bool Parsing::prepareTOPIC(const std::string &params, std::string &channel, std::string &topic)

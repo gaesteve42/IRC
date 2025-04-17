@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:21 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/11 14:26:15 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/17 22:15:49 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 
 Channel::Channel(const std::string &name) : channelName(name), topic(""), key(""), inviteOnly(false), topicRestricted(false), userLimit(0) {}
 
-// Ajoute un membre au canal s'il y a de la place et qu'il n'est pas déjà membre
 bool Channel::addMember(User *user)
 {
 	if (userLimit != 0 && members.size() >= userLimit)
@@ -27,7 +26,6 @@ bool Channel::addMember(User *user)
 	return false;
 }
 
-// Retire un membre du canal
 void Channel::removeMember(User *user)
 {
 	std::vector<User*>::iterator it = std::find(members.begin(), members.end(), user);
@@ -52,7 +50,6 @@ void Channel::setTopicRestricted(bool restricted) { topicRestricted = restricted
 void Channel::setUserLimit(size_t limit) { userLimit = limit; }
 
 // ===== Utilitaire =====
-// Vérifie si un user spécifique est déjà membre du canal
 bool Channel::isMember(const User *user) const
 {
 	return std::find(members.begin(), members.end(), user) != members.end();
@@ -99,3 +96,12 @@ std::string Channel::getModeParams() const
 void Channel::addInvite(User* user) { invitedUsers.insert(user); }
 bool Channel::isInvited(User* user) const { return invitedUsers.find(user) != invitedUsers.end(); }
 void Channel::removeInvite(User* user) { invitedUsers.erase(user); }
+
+// Gestion des opérateurs
+bool Channel::isOperator(User* user) const { return operators.count(user) > 0; }
+void Channel::addOperator(User* user)
+{
+	if (isMember(user))
+		operators.insert(user);
+}
+void Channel::removeOperator(User* user) { operators.erase(user); }
