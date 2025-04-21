@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/21 13:40:01 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/21 13:48:04 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ IRCManager::~IRCManager()
 		delete it->second;
 }
 
+// ==== Gestion des utilisateurs ====
 void IRCManager::newUser(int fd)
 {
 	User *user = new User(fd);
@@ -58,6 +59,7 @@ User* IRCManager::getUserByNick(const std::string& nickname)
 	return NULL;
 }
 
+// ==== Gestion des canaux ====
 Channel* IRCManager::getChannel(const std::string& name)
 {
 	std::map<std::string, Channel*>::iterator it = channels.find(name);
@@ -93,6 +95,7 @@ void IRCManager::sendNamesReply(Channel* channel)
 	}
 }
 
+// ==== Commandes IRC principales ====
 void IRCManager::joinCommand(int fd, const std::string &input)
 {
 	User *user = getUser(fd);
@@ -186,7 +189,7 @@ void IRCManager::joinCommand(int fd, const std::string &input)
 	std::string endReply  = RPL_ENDOFNAMES(user->getNickname(), channelName);
 	send(fd, nameReply.c_str(), nameReply.length(), 0);
 	send(fd, endReply.c_str(), endReply.length(), 0);
-	// 8️⃣ Appel optionnel selon ton implémentation :
+	// 8️⃣ Appel optionnel selon ton implémentation
 	sendNamesReply(channel);
 }
 
@@ -206,7 +209,7 @@ void IRCManager::partCommand(int fd, const std::string &channelName, const std::
 	std::string partMsg = prefix + " PART " + channelName;
 
 	if (!reason.empty())
-		partMsg += " :" + reason;  // On ajoute le reason s’il existe
+		partMsg += " :" + reason; // On ajoute le reason s’il existe
 	partMsg += "\r\n";
 	// broadcast le message PART
 	const std::vector<User*>& members = channel->getMembers();
@@ -407,7 +410,6 @@ void IRCManager::modeCommand(int fd, const std::string &channelName, const std::
 								channel->addOperator(members[j]);
 							else
 								channel->removeOperator(members[j]);
-							// ICI on envoie un message de notification
 							if (add)
 							{
 								std::string notice = ":ircserv NOTICE #channel :" + nick + " est maintenant opérateur\r\n";
@@ -531,10 +533,10 @@ void IRCManager::inviteCommand(int fd, const std::string &channelName, const std
 		return;
 	}
 	channel->addInvite(target);
-	//mess a celui qui invite
+	//message a celui qui invite
 	std::string msg = ":" + sender->getNickname() + " INVITE " + target->getNickname() + " :" + channelName + "\r\n";
 	send(fd, msg.c_str(), msg.length(), 0);
-	//mess a celui qui est invite
+	//message a celui qui est invite
 	std::string inviteMsg = ":" + sender->getNickname() + " INVITE " + target->getNickname() + " :" + channelName + "\r\n";
 	send(target->getFd(), inviteMsg.c_str(), inviteMsg.length(), 0);
 }
