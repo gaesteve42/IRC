@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:16:35 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/13 16:50:01 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/21 13:32:55 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,10 @@ class Parsing
 		Parsing();
 		~Parsing();
 
-		std::string prefix;   // Préfixe (par exemple : :nickname!user@host)
-		std::string command;  // Commande (par exemple : NICK, USER, PRIVMSG)
-		std::string params;   // Paramètres (tout avant ":")
-		std::string suffix;   // Suffixe (tout après ":")
+		std::string prefix; // Préfixe (par exemple : :nickname!user@host)
+		std::string command; // Commande (par exemple : NICK, USER, PRIVMSG)
+		std::string params; // Paramètres (tout avant ":")
+		std::string suffix; // Suffixe (tout après ":")
 
 		void parseCommand(const std::string &message);
 		void parseSingleCommand(const std::string &message);

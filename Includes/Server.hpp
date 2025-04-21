@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:05:58 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/14 16:08:27 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/21 13:32:45 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,21 +18,21 @@
 class Server
 {
 private:
-    int _serverSocket;                  // Socket principal du serveur
-    int _port;                           // Port sur lequel on écoute
-    std::string _pass;                     // password pour se connecter
-    std::vector<struct pollfd> _pollFds; // Liste des sockets surveillés avec poll()
+	int _serverSocket; // Socket principal du serveur
+	int _port; // Port sur lequel on écoute
+	std::string _pass; // password pour se connecter
+	std::vector<struct pollfd> _pollFds; // Liste des sockets surveillés avec poll()
 
-    void handleNewConnection();          // Gère les nouvelles connexions
-    void handleClientMessage(int clientFd); // Gère les messages reçus des clients
-    void removeClient(int clientFd);     // Supprime un client qui s'est déconnecté
-    Parsing parser;
-    IRCManager ircManager;
+	void handleNewConnection(); // Gère les nouvelles connexions
+	void handleClientMessage(int clientFd); // Gère les messages reçus des clients
+	void removeClient(int clientFd); // Supprime un client qui s'est déconnecté
+	Parsing parser;
+	IRCManager ircManager;
 
 public:
-    Server(int port, std::string pass);
-    ~Server();
-    void run();  // Boucle principale du serveur
+	Server(int port, std::string pass);
+	~Server();
+	void run(); // Boucle principale du serveur
 };
 
 #endif

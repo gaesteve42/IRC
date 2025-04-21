@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/17 22:12:47 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/21 13:40:01 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -587,8 +587,3 @@ void IRCManager::topicCommand(int fd, const std::string &channelName, const std:
 		send(fd, msg.c_str(), msg.length(), 0);
 	}
 }
-
-
-
-
-

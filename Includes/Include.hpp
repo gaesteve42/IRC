@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Include.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/03 15:29:54 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/14 15:17:23 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/21 13:32:59 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,9 +38,6 @@
 #include "IRCManager.hpp"
 #include "Parsing.hpp"
 #include "Server.hpp"
-
-// Format standard                        ":server_name CODE nickname :message\r\n"
-
 #define SERVER_NAME "ircserv"
 
 //couleur
@@ -48,7 +45,6 @@
 #define IRC_RESET "\x0F"
 
 // ========================== 🔴 ERREURS ==========================
-
 #define ERR_NEEDMOREPARAMS(cmd)           (std::string("461 ") + cmd + " :Not enough parameters\r\n")
 #define ERR_NOSUCHNICK(nick)              (std::string("401 ") + nick + " :No such nick/channel\r\n")
 #define ERR_NOSUCHCHANNEL(chan)           (std::string("403 ") + chan + " :No such channel\r\n")
@@ -71,7 +67,6 @@
 #define ERR_INVALIDMODEPARAM(chan, mode)  (std::string("696 ") + chan + " " + mode + " :Invalid mode parameter\r\n")
 
 // ========================== 🟢 RÉPONSES ==========================
-
 #define RPL_TOPIC(chan, topic)            (std::string("332 ") + chan + " :" + topic + "\r\n")
 #define RPL_NOTOPIC(chan)                 (std::string("331 ") + chan + " :No topic is set\r\n")
 #define RPL_NAMREPLY(nick, symbol, channel, names) \
