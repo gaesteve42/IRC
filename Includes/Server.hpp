@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:05:58 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/21 13:32:45 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/29 18:26:11 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ private:
 	void handleNewConnection(); // Gère les nouvelles connexions
 	void handleClientMessage(int clientFd); // Gère les messages reçus des clients
 	void removeClient(int clientFd); // Supprime un client qui s'est déconnecté
+	void processParsedLine(User *user, const std::string &line);
 	Parsing parser;
 	IRCManager ircManager;
 
@@ -36,8 +37,6 @@ public:
 };
 
 #endif
-
-
 
 /*
 Création du socket et écoute sur le port donné en argument
