@@ -6,7 +6,7 @@
 /*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 15:07:45 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/16 16:49:55 by yonieva          ###   ########.fr       */
+/*   Updated: 2025/04/29 17:23:00 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,176 +80,204 @@ Server::~Server()
 
 //--------------------------------------------------------------------SERVEUR EN ROUTE--------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-// Gère les nouvelles connexions clients
 void Server::handleClientMessage(int clientFd)
 {
     char buffer[512];
     memset(buffer, 0, sizeof(buffer));
 
     int bytesReceived = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
-    if (bytesReceived <= 0)
-    {
-        std::cout << "❌ Client déconnecté (FD : " << clientFd << ")" << std::endl;
-        removeClient(clientFd);
-        ircManager.removeUser(clientFd);
-        return;
-    }
-    std::string message(buffer);
-    Parsing parsedMessage;
-    parsedMessage.parseCommand(message);  // Découpe le message en prefix, command, params, suffix
-    std::cout << ">> Client Fd " << clientFd << std::endl;
-    std::cout << ">> Prefix : " << parsedMessage.prefix << std::endl;
-    std::cout << ">> Commande : " << parsedMessage.command << std::endl;
-    std::cout << ">> Parametres : " << parsedMessage.params << std::endl;
-    std::cout << ">> Suffix : " << parsedMessage.suffix << std::endl << std::endl;
-    User *user = ircManager.getUser(clientFd);
 
+    User *user = ircManager.getUser(clientFd);
     if (!user)
         return;
+    
 
-    // Check si user a donné le bon mot de passe
-    if (!user->hasProvidedPassword())
+
+    if (bytesReceived == 0)
     {
-        if (parsedMessage.command == "PASS")
+        User *user = ircManager.getUser(clientFd);
+        if (!user || user->recvBuffer.empty())
         {
-            if (parsedMessage.params == _pass)
+            std::cout << "❌ Déconnexion (FD : " << clientFd << ")" << std::endl;
+            removeClient(clientFd);
+            ircManager.removeUser(clientFd);
+        }
+        return; // on ne traite pas maintenant, on attend peut-être encore une fin de commande
+    }
+    else if (bytesReceived < 0)
+    {
+        std::cerr << "⚠️ Erreur de recv()" << std::endl;
+        return;
+    }
+
+    // Ajouter à son buffer perso
+    user->recvBuffer += std::string(buffer, bytesReceived);
+
+
+    size_t pos;
+    while ((pos = user->recvBuffer.find('\n')) != std::string::npos)
+    {
+        std::string line = user->recvBuffer.substr(0, pos);
+        user->recvBuffer.erase(0, pos + 1);
+
+        // Nettoyage du \r final éventuel
+        if (!line.empty() && line[line.size() - 1] == '\r')
+            line.erase(line.size() - 1);
+
+        if (line.empty())
+            continue;
+
+        Parsing parsedMessage;
+        parsedMessage.parseSingleCommand(line);
+
+        std::cout << ">> Client Fd " << clientFd << std::endl;
+        std::cout << ">> Prefix : " << parsedMessage.prefix << std::endl;
+        std::cout << ">> Commande : " << parsedMessage.command << std::endl;
+        std::cout << ">> Parametres : " << parsedMessage.params << std::endl;
+        std::cout << ">> Suffix : " << parsedMessage.suffix << std::endl << std::endl;
+
+        // Check mot de passe
+        if (!user->hasProvidedPassword())
+        {
+            if (parsedMessage.command == "PASS")
             {
-                user->setHasProvidedPassword(true);
-                std::cout << "✅ Mot de passe accepté pour FD " << clientFd << std::endl;
-                std::string msg = ":ircserv NOTICE * :Mot de passe accepté par le serveur\r\n";
-				send(clientFd, msg.c_str(), msg.length(), 0);
-                return;
+                if (parsedMessage.params == _pass)
+                {
+                    user->setHasProvidedPassword(true);
+                    std::cout << "✅ Mot de passe accepté pour FD " << clientFd << std::endl;
+                    std::string msg = ":ircserv NOTICE * :Mot de passe accepté par le serveur\r\n";
+                    send(clientFd, msg.c_str(), msg.length(), 0);
+                    continue;
+                }
+                else
+                {
+                    std::cout << "❌ Mauvais mot de passe pour FD " << clientFd << std::endl;
+                    std::string err = "ERROR :Mot de passe incorrect, deconnexion du serveur...\r\n";
+                    send(clientFd, err.c_str(), err.length(), 0);
+                    removeClient(clientFd);
+                    ircManager.removeUser(clientFd);
+                    return;
+                }
             }
             else
             {
-                std::cout << "❌ Mauvais mot de passe pour FD " << clientFd << std::endl;
-                std::string err = "ERROR :Mot de passe incorrect, deconnexion su serveur...\r\n";
-                send(clientFd, err.c_str(), err.length(), 0);
-                removeClient(clientFd);
-                ircManager.removeUser(clientFd);
-                return;
+                if (user->passMess == 1)
+                {
+                    std::string err = "ERROR :Mot de passe requis\r\n";
+                    send(clientFd, err.c_str(), err.length(), 0);
+                    user->passMess = 0;
+                    continue;
+                }
+                continue;
             }
         }
-        else
-        {
-            std::string err = "ERROR :Mot de passe requis\r\n";
-            send(clientFd, err.c_str(), err.length(), 0);
-            return;
-        }
-    }
 
-    // Vérification des commandes avec un paramètre
-    if ((parsedMessage.command == "NICK" || parsedMessage.command == "USER" || parsedMessage.command == "JOIN" ||
-         parsedMessage.command == "PART")  && parsedMessage.params.empty())
-    {
-        std::string errorMsg = ERR_NEEDMOREPARAMS(parsedMessage.command);
-        send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
-        return;
-    }
-
-    // Traitement des commandes----------------------------------------------------------
-    if (parsedMessage.command == "NICK")
-    {
-        ircManager.nickCommand(clientFd, parsedMessage.params);
-    }
-    else if (parsedMessage.command == "USER")
-    {
-        ircManager.userCommand(clientFd, parsedMessage.params);
-    }
-    else if (parsedMessage.command == "JOIN")
-    {
-        ircManager.joinCommand(clientFd, parsedMessage.params);
-    }
-    /*else if (parsedMessage.command == "WHO")
-    {
-        ircManager.whoCommand(clientFd, parsedMessage.params);
-    }*/
-    else if (parsedMessage.command == "PART")
-    {
-		std::string channelName;
-		{
-			std::istringstream iss(parsedMessage.params);
-			iss >> channelName; // récupère le #channel
-			// si tu as besoin du reason
-			std::string reason = parsedMessage.suffix;
-			ircManager.partCommand(clientFd, channelName, reason);
-		}
-	}
-    else if (parsedMessage.command == "PRIVMSG")
-    {
-        std::string channel, message;
-		if (parsedMessage.preparePRIVMSG(parsedMessage.params, parsedMessage.suffix, channel, message))
-		{
-			ircManager.privmsgCommand(clientFd, channel, message);
-        }
-        else
+        // Commandes nécessitant un paramètre
+        if ((parsedMessage.command == "NICK" || parsedMessage.command == "USER" ||
+             parsedMessage.command == "JOIN" || parsedMessage.command == "PART") &&
+             parsedMessage.params.empty())
         {
             std::string errorMsg = ERR_NEEDMOREPARAMS(parsedMessage.command);
             send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
+            continue;
         }
-    }
-    else if (parsedMessage.command == "MODE")
-    {
-        std::string channelName, modeStr;
-        std::vector<std::string> modeParams;
 
-        // Appel de prepareMODE pour extraire le channel, les modes et les paramètres
-        if (parsedMessage.prepareMODE(parsedMessage.params, channelName, modeStr, modeParams))
+        // Traitement des commandes
+        if (parsedMessage.command == "NICK")
         {
-            // Passe le channel, la chaîne de modes et les paramètres à modeCommand
-            ircManager.modeCommand(clientFd, channelName, modeStr, modeParams);
+            ircManager.nickCommand(clientFd, parsedMessage.params);
         }
-        else
+        else if (parsedMessage.command == "USER")
         {
-            std::string errorMsg = ERR_NEEDMOREPARAMS(parsedMessage.command);
+            ircManager.userCommand(clientFd, parsedMessage.params);
+        }
+        else if (parsedMessage.command == "JOIN")
+        {
+            ircManager.joinCommand(clientFd, parsedMessage.params);
+        }
+        else if (parsedMessage.command == "PART")
+        {
+            std::string channelName;
+            std::istringstream iss(parsedMessage.params);
+            iss >> channelName;
+            std::string reason = parsedMessage.suffix;
+            ircManager.partCommand(clientFd, channelName, reason);
+        }
+        else if (parsedMessage.command == "PRIVMSG")
+        {
+            std::string channel, message;
+            if (parsedMessage.preparePRIVMSG(parsedMessage.params, parsedMessage.suffix, channel, message))
+            {
+                ircManager.privmsgCommand(clientFd, channel, message);
+            }
+            else
+            {
+                std::string errorMsg = ERR_NEEDMOREPARAMS(parsedMessage.command);
+                send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
+            }
+        }
+        else if (parsedMessage.command == "MODE")
+        {
+            std::string channelName, modeStr;
+            std::vector<std::string> modeParams;
+            if (parsedMessage.prepareMODE(parsedMessage.params, channelName, modeStr, modeParams))
+            {
+                ircManager.modeCommand(clientFd, channelName, modeStr, modeParams);
+            }
+            else
+            {
+                std::string errorMsg = ERR_NEEDMOREPARAMS(parsedMessage.command);
+                send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
+            }
+        }
+        else if (parsedMessage.command == "KICK")
+        {
+            std::string channel, target, reason;
+            if (parsedMessage.prepareKICK(parsedMessage.params, parsedMessage.suffix, channel, target, reason))
+            {
+                ircManager.kickCommand(clientFd, channel, target, reason);
+            }
+            else
+            {
+                std::string err = ERR_NEEDMOREPARAMS("KICK");
+                send(clientFd, err.c_str(), err.length(), 0);
+            }
+        }
+        else if (parsedMessage.command == "INVITE")
+        {
+            std::string channel, target;
+            if (parsedMessage.prepareINVITE(parsedMessage.params, channel, target))
+            {
+                ircManager.inviteCommand(clientFd, channel, target);
+            }
+            else
+            {
+                std::string err = ERR_NEEDMOREPARAMS("INVITE");
+                send(clientFd, err.c_str(), err.length(), 0);
+            }
+        }
+        else if (parsedMessage.command == "TOPIC")
+        {
+            std::string channelName;
+            std::istringstream iss(parsedMessage.params);
+            if (!(iss >> channelName))
+            {
+                std::string err = ERR_NEEDMOREPARAMS("TOPIC");
+                send(clientFd, err.c_str(), err.length(), 0);
+                continue;
+            }
+            ircManager.topicCommand(clientFd, channelName, parsedMessage.suffix);
+        }
+        else if (parsedMessage.command != "WHO")
+        {
+            std::string errorMsg = ERR_UNKNOWNCOMMAND(parsedMessage.command);
             send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
         }
     }
-
-	else if (parsedMessage.command == "KICK")
-	{
-		std::string channel, target, reason;
-		if (parsedMessage.prepareKICK(parsedMessage.params, parsedMessage.suffix, channel, target, reason))
-			ircManager.kickCommand(clientFd, channel, target, reason);
-		else
-		{
-			std::string err = ERR_NEEDMOREPARAMS("KICK");
-			send(clientFd, err.c_str(), err.length(), 0);
-		}
-	}
-    else if (parsedMessage.command == "INVITE")
-    {
-        std::string channel, target;
-        if (parsedMessage.prepareINVITE(parsedMessage.params, channel, target))
-            ircManager.inviteCommand(clientFd, channel, target);
-        else
-        {
-            std::string err = ERR_NEEDMOREPARAMS("INVITE");
-            send(clientFd, err.c_str(), err.length(), 0);
-        }
-    }
-    else if (parsedMessage.command == "TOPIC")
-	{
-		std::string channelName;
-		std::istringstream iss(parsedMessage.params);
-		if (!(iss >> channelName))
-		{
-			std::string err = ERR_NEEDMOREPARAMS("TOPIC");
-			send(clientFd, err.c_str(), err.length(), 0);
-			return;
-		}
-		ircManager.topicCommand(clientFd, channelName, parsedMessage.suffix);
-	}
-	else
-	{
-		if (parsedMessage.command != "WHO")
-		{
-			std::string errorMsg = ERR_UNKNOWNCOMMAND(parsedMessage.command);
-			send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
-		}
-	}
 }
 
+
+// Gère les nouvelles connexions clients
 void Server::handleNewConnection()
 {
     // Accepter la nouvelle connexion

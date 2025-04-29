@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 16:16:35 by yonieva           #+#    #+#             */
-/*   Updated: 2025/04/21 13:32:55 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/29 16:34:42 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ class Parsing
 		std::string params; // Paramètres (tout avant ":")
 		std::string suffix; // Suffixe (tout après ":")
 
-		void parseCommand(const std::string &message);
+		//void parseCommand(const std::string &message);
 		void parseSingleCommand(const std::string &message);
 		bool preparePRIVMSG(const std::string& params, const std::string& suffix, std::string& target, std::string& message);
 		bool prepareMODE(const std::string &params, std::string &channelName, std::string &modeStr, std::vector<std::string> &modeParams);

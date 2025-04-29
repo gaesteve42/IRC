@@ -3,24 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:28:53 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/21 13:48:33 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/29 15:55:26 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Include.hpp"
 
 // Constructeur par défaut
-User::User() : fd(-1), nickname(""), username(""), hostname(""), Password_is_ok(false), authenticated(false) {}
+User::User() : fd(-1), nickname(""), username(""), hostname(""), Password_is_ok(false), authenticated(false), passMess(true) {}
 
 //Constructeur avec fd
-User::User(int fd) : fd(fd), nickname(""), username(""), hostname(""), Password_is_ok(false), authenticated(false) {}
+User::User(int fd) : fd(fd), nickname(""), username(""), hostname(""), Password_is_ok(false), authenticated(false), passMess(true) {}
 
 // Constructeur complet
 User::User(int fd, const std::string &nick, const std::string &user, const std::string &host)
-	: fd(fd), nickname(nick), username(user), hostname(host), Password_is_ok(false), authenticated(false) {}
+	: fd(fd), nickname(nick), username(user), hostname(host), Password_is_ok(false), authenticated(false), passMess(true) {}
 
 // ===== Getters (accès en lecture aux attributs privés) =====
 std::string User::getNickname() const { return nickname; }

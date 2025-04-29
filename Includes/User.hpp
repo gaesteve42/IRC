@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: yonieva <yonieva@student.42perpignan.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:00 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/21 13:32:50 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/04/29 15:53:26 by yonieva          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,8 @@ public:
 	User(int fd);
 	User(int fd, const std::string &nick, const std::string &user, const std::string &host);
 	// Getters
+	std::string recvBuffer;
+	bool passMess;
 	std::string getNickname() const;
 	std::string getUsername() const;
 	std::string getHostname() const;
