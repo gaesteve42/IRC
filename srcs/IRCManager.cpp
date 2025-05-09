@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/05/09 23:16:20 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/05/09 23:17:39 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -286,7 +286,6 @@ void IRCManager::nickCommand(int fd, const std::string &nickname)
 	if (!user->getUsername().empty())
 		user->setAuthenticated(true);
 }
-
 
 void IRCManager::userCommand(int fd, const std::string &username)
 {
