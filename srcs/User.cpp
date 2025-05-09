@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:28:53 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/05/09 23:14:18 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/05/09 23:48:08 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,6 @@ User::User() : fd(-1), nickname(""), username(""), hostname(""), Password_is_ok(
 
 //Constructeur avec fd
 User::User(int fd) : fd(fd), nickname(""), username(""), hostname(""), Password_is_ok(false), authenticated(false), passMess(true) {}
-
-// Constructeur complet
-User::User(int fd, const std::string &nick, const std::string &user, const std::string &host)
-	: fd(fd), nickname(nick), username(user), hostname(host), Password_is_ok(false), authenticated(false), passMess(true) {}
 
 // ===== Getters (accès en lecture aux attributs privés) =====
 std::string User::getNickname() const { return nickname; }
