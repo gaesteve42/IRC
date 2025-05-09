@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/05/09 23:13:48 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/05/09 23:16:20 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ void IRCManager::joinCommand(int fd, const std::string &input)
 		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
-	// 1️⃣ Découper en channelName + userKey
+	// Découper en channelName + userKey
 	std::string channelName, userKey;
 	size_t spacePos = input.find(' ');
 	if (spacePos != std::string::npos)
@@ -123,7 +123,7 @@ void IRCManager::joinCommand(int fd, const std::string &input)
 		return;
 	}
 	Channel *channel;
-	// 2️⃣ Créer le channel s’il n’existe pas
+	// Créer le channel s’il n’existe pas
 	if (channels.find(channelName) == channels.end())
 	{
 		channel = new Channel(channelName);
@@ -134,7 +134,7 @@ void IRCManager::joinCommand(int fd, const std::string &input)
 	else
 	{
 		channel = channels[channelName];
-		// 3️⃣ Vérifier le mode +i (inviteOnly)
+		// Vérifier le mode +i
 		if (channel->isInviteOnly() && !channel->isInvited(user))
 		{
 			std::string msg = ERR_INVITEONLYCHAN(channelName);
@@ -142,14 +142,14 @@ void IRCManager::joinCommand(int fd, const std::string &input)
 			return;
 		}
 
-		// 4️⃣ Vérifier le mode +k (clé)
+		// Vérifier le mode +k
 		if (!channel->getKey().empty() && channel->getKey() != userKey)
 		{
 			std::string msg = ERR_BADCHANNELKEY(channelName);
 			send(fd, msg.c_str(), msg.length(), 0);
 			return;
 		}
-		// 5️⃣ Vérifier la limite +l
+		// Vérifier la limite +l
 		if (channel->getUserLimit() > 0 && channel->getMembers().size() >= channel->getUserLimit())
 		{
 			std::string msg = ERR_CHANNELISFULL(channelName);
@@ -163,16 +163,16 @@ void IRCManager::joinCommand(int fd, const std::string &input)
 			return;
 		}
 	}
-	// ➡️ À partir d'ici, l'utilisateur est membre confirmé du channel
+	// À partir d'ici l'utilisateur est membre confirmé du channel
 	channel->removeInvite(user);
-	// 6️⃣ Envoyer un message JOIN visible par tous les membres du canal
+	// Envoyer un message JOIN visible par tous les membres du canal
 	std::string joinMsg = ":" + user->getNickname() + "!" + user->getUsername()
 						+ "@localhost JOIN :" + channelName + "\r\n";
 
 	const std::vector<User*>& members = channel->getMembers();
 	for (size_t i = 0; i < members.size(); ++i)
 		send(members[i]->getFd(), joinMsg.c_str(), joinMsg.length(), 0);
-	// 7️⃣ Envoyer la liste des pseudos (RPL_NAMREPLY et RPL_ENDOFNAMES)
+	// Envoyer la liste des pseudos (RPL_NAMREPLY et RPL_ENDOFNAMES)
 	std::string names;
 	for (size_t i = 0; i < members.size(); ++i)
 	{
@@ -186,7 +186,6 @@ void IRCManager::joinCommand(int fd, const std::string &input)
 	std::string endReply  = RPL_ENDOFNAMES(user->getNickname(), channelName);
 	send(fd, nameReply.c_str(), nameReply.length(), 0);
 	send(fd, endReply.c_str(), endReply.length(), 0);
-	// 8️⃣ Appel optionnel selon ton implémentation
 	sendNamesReply(channel);
 }
 
@@ -213,9 +212,7 @@ void IRCManager::partCommand(int fd, const std::string &channelName, const std::
 	{
 		send(members[i]->getFd(), partMsg.c_str(), partMsg.length(), 0);
 	}
-	// retire user
 	channel->removeMember(user);
-	// s’il est vide -> suppr
 	if (channel->getMembers().empty())
 	{
 		delete channel;
@@ -271,7 +268,7 @@ void IRCManager::nickCommand(int fd, const std::string &nickname)
 	User *user = getUser(fd);
 	if (!user)
 		return;
-	// Vérification : le nickname est-il déjà utilisé par un autre utilisateur ?
+	// Vérification si le nickname est déjà utilisé par un autre utilisateur
 	for (std::map<int, User*>::iterator it = users.begin(); it != users.end(); ++it)
 	{
 		User *otherUser = it->second;
