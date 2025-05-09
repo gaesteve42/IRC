@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:03:23 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/21 13:48:04 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/05/09 23:13:48 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,6 @@ void IRCManager::sendNamesReply(Channel* channel)
 		}
 		std::string nameReply = RPL_NAMREPLY(members[i]->getNickname(), "=", channel->getChannelName(), names);
 		std::string endReply  = RPL_ENDOFNAMES(members[i]->getNickname(), channel->getChannelName());
-
 		send(members[i]->getFd(), nameReply.c_str(), nameReply.length(), 0);
 		send(members[i]->getFd(), endReply.c_str(), endReply.length(), 0);
 	}
@@ -129,14 +128,12 @@ void IRCManager::joinCommand(int fd, const std::string &input)
 	{
 		channel = new Channel(channelName);
 		channels[channelName] = channel;
-
 		channel->addMember(user);
 		channel->addOperator(user);
 	}
 	else
 	{
 		channel = channels[channelName];
-
 		// 3️⃣ Vérifier le mode +i (inviteOnly)
 		if (channel->isInviteOnly() && !channel->isInvited(user))
 		{
@@ -207,9 +204,8 @@ void IRCManager::partCommand(int fd, const std::string &channelName, const std::
 	// construire le message PART
 	std::string prefix = ":" + user->getNickname() + "!" + user->getUsername() + "@localhost";
 	std::string partMsg = prefix + " PART " + channelName;
-
 	if (!reason.empty())
-		partMsg += " :" + reason; // On ajoute le reason s’il existe
+		partMsg += " :" + reason; // On ajoute la raison si y en a une
 	partMsg += "\r\n";
 	// broadcast le message PART
 	const std::vector<User*>& members = channel->getMembers();
@@ -275,7 +271,6 @@ void IRCManager::nickCommand(int fd, const std::string &nickname)
 	User *user = getUser(fd);
 	if (!user)
 		return;
-
 	// Vérification : le nickname est-il déjà utilisé par un autre utilisateur ?
 	for (std::map<int, User*>::iterator it = users.begin(); it != users.end(); ++it)
 	{
@@ -288,12 +283,9 @@ void IRCManager::nickCommand(int fd, const std::string &nickname)
 			return;
 		}
 	}
-
 	user->setNickname(nickname);
-
 	std::string msg = ":ircserv 001 " + nickname + " :Nickname défini\r\n";
 	send(fd, msg.c_str(), msg.length(), 0);
-
 	if (!user->getUsername().empty())
 		user->setAuthenticated(true);
 }
@@ -334,10 +326,8 @@ void IRCManager::modeCommand(int fd, const std::string &channelName, const std::
 		send(fd, msg.c_str(), msg.length(), 0);
 		return;
 	}
-
 	bool add = true;
 	size_t paramIndex = 0;
-
 	for (size_t i = 0; i < modeStr.length(); ++i)
 	{
 		char m = modeStr[i];

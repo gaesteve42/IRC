@@ -6,7 +6,7 @@
 /*   By: gaesteve <gaesteve@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 15:29:21 by gaesteve          #+#    #+#             */
-/*   Updated: 2025/04/21 13:39:28 by gaesteve         ###   ########.fr       */
+/*   Updated: 2025/05/09 23:13:58 by gaesteve         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ bool Channel::isMember(const User *user) const
 {
 	return std::find(members.begin(), members.end(), user) != members.end();
 }
+
 bool Channel::isInChannel(int fd) const
 {
 	for (size_t i = 0; i < members.size(); ++i)
