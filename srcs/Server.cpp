@@ -89,7 +89,6 @@ void Server::handleClientMessage(int clientFd)
 
 		std::cout << "❌ Déconnexion (FD : " << clientFd << ")" << std::endl;
 		removeClient(clientFd);
-		ircManager.removeUser(clientFd);
 		return;
 	}
 	else if (bytesReceived < 0)
@@ -236,7 +235,6 @@ void Server::processParsedLine(User *user, const std::string &line)
 				std::string err = "ERROR :Mot de passe incorrect, deconnexion du serveur...\r\n";
 				send(clientFd, err.c_str(), err.length(), 0);
 				removeClient(clientFd);
-				ircManager.removeUser(clientFd);
 			}
 		}
 		else
